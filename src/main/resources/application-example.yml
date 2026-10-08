@@ -1,0 +1,62 @@
+application:
+  swagger:
+    enabled: true
+    title: Сервис service-requests-adapter
+    description: Описание API сервиса service-requests-adapter
+    version: 1.0.0
+  monitor:
+    enabled: true
+    rest:
+      incoming: true
+      outgoing: true
+      showBody: true
+      showHeader: true
+      showCookie: false
+  logs:
+    amqp:
+      uri: amqp://amq:amq@localhost:5672
+      key: logs.local
+
+server:
+  port: 8080
+  servlet:
+    context-path: /service-requests-adapter
+
+spring:
+  application:
+    name: service-requests-adapter
+  main:
+    allow-bean-definition-overriding: true
+  security:
+    oauth2:
+      resourceserver:
+        opaquetoken:
+          introspection-uri: http://uidm.uidm-dev.d.exportcenter.ru/sso/oauth2/tokeninfo
+#            introspection-uri: https://lk.t.exportcenter.ru/sso/oauth2/tokeninfo
+      client:
+        registration:
+          uidm:
+            client-id:
+            client-secret:
+            authorization-grant-type: client_credentials
+        provider:
+          uidm:
+            token-uri: http://uidm.uidm-dev.d.exportcenter.ru/sso/oauth2/access_token
+#            token-uri: https://lk.t.exportcenter.ru/sso/oauth2/access_token
+
+springdoc:
+  swagger-ui:
+    enabled: true
+  packages-to-scan: ru.seventech
+
+pass-error-trace: true
+
+mdm-adapter:
+  base-url: https://lk.t.exportcenter.ru/mdm-adapter
+#  base-url: http://mdm-api-adapter.integration-dev.d.exportcenter.ru/mdm-adapter
+
+notify-api-adapter:
+  base-url: https://lk.t.exportcenter.ru/notify-adapter/
+
+storage-url:
+  base-url: http://localhost:8082/docstore

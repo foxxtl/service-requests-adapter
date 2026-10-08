@@ -1,0 +1,51 @@
+{
+  "fetchFields": [
+    "start_version",
+    "next_version",
+    {
+      "orgProviderId": [
+        "uuid",
+        "caption"
+      ]
+    },
+    {
+      "recEmployeeId": [
+        "uuid",
+        "username"
+      ]
+    },
+    //TODO: постановка не дописана, необходимо дополнить список полей
+    {
+      "serviceChanges": [
+        "uuid",
+        "creationDate"
+      ]
+    },
+    {
+      "serviceChangesHistory": [
+        "name",
+        "comment",
+        "statusDate",
+        {
+          "userId": [
+            "uuid",
+            "username"
+          ]
+        },
+        {
+          "statusId": [
+            "code",
+            "comment",
+            "caption"
+          ]
+        },
+        {
+          "attributes": [
+            "code",
+            "caption"
+          ]
+        }
+      ]
+    }
+  ]
+}

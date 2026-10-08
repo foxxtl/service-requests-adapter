@@ -1,0 +1,136 @@
+{
+  "fetchFields": [
+    "caption",
+    "interfaceUrl",
+    "myExportServiceEKU",
+    "otherInformEKU",
+    "infoVED",
+    "availabilityRegions",
+    "productInfo",
+    "recipient",
+    "clientCategoryEKU",
+    "codeBudget",
+    "productNumber",
+    "subsideMax",
+    "productName",
+    "subsideGoal",
+    "nameGRBS",
+    "freezed",
+    "description",
+    "branchExpImp",
+    "publicPortalEKU",
+    "result",
+    "shortNameGRBS",
+    "subsideRecipientsSelection",
+    "termServiceSite",
+    "duration",
+    "mspEKU",
+    "subsideSum",
+    "terrSementEKU",
+    "typeServicePayment",
+    "subsideType",
+    "subsideUID",
+    "idExtService",
+    "serviceActivityEKU",
+    {
+      "orgId": [
+        "uuid",
+        "caption"
+      ]
+    },
+    {
+      "legalReasonServEKU": [
+        "name",
+        "link",
+        "numberDetail"
+      ]
+    },
+    {
+      "ecmDocs": [
+        "ecmDocType",
+        "ecmDocUuid",
+        "ecmDocUpdateDate",
+        "ecmDocCreateDate",
+        "ecmDocName",
+        "ecmDocAuthor",
+        "docKind"
+      ]
+    },
+    {
+      "costServiceDescEKU": [
+        "cost",
+        "term",
+        "comment",
+        "numberDetail"
+      ]
+    },
+    {
+      "wayResultEKU": [
+        {
+          "wayDeliveryResult": [
+            "resultDeliveryMethod",
+            "itemOrder",
+            "type",
+            "slug"
+          ]
+        }
+      ]
+    },
+    {
+      "wayApplicationEKU": [
+        {
+          "wayApplication": [
+            "type",
+            "itemOrder",
+            "submissionMethod",
+            "slug"
+          ]
+        }
+      ]
+    },
+    {
+      "clientDocs": [
+        "orderDoc",
+        "wayGetDoc",
+        "url",
+        "numberDetail",
+        "name"
+      ]
+    },
+    {
+      "regionServEKU": [
+        {
+          "name": [
+            "code",
+            "regionName"
+          ]
+        }
+      ]
+    },
+    {
+      "contactsOrgEKU": [
+        "fullName",
+        "email",
+        "phone",
+        "address",
+        "site",
+        "positione",
+        {
+          "organization": [
+            "uuid",
+            "caption"
+          ]
+        }
+      ]
+    },
+    {
+      "directionVedId": [
+        {
+          "name": [
+            "directionName"
+          ]
+        }
+      ]
+    }
+  ]
+}
