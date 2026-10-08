@@ -1,0 +1,57 @@
+application:
+  swagger:
+    enabled: true
+    title: ?????? service-requests-adapter
+    description: ???????? API ??????? service-requests-adapter
+    version: 1.0.0
+  monitor:
+    enabled: true
+    rest:
+      incoming: true
+      outgoing: true
+      showBody: true
+      showHeader: true
+      showCookie: false
+
+server:
+  port: 8080
+  servlet:
+    context-path: /service-requests-adapter
+
+spring:
+  application:
+    name: service-requests-adapter
+  main:
+    allow-bean-definition-overriding: true
+  security:
+    oauth2:
+      resourceserver:
+        opaquetoken:
+          introspection-uri:
+      client:
+        registration:
+          uidm:
+            client-id:
+            client-secret:
+            authorization-grant-type: client_credentials
+        provider:
+          uidm:
+            token-uri:
+
+springdoc:
+  swagger-ui:
+    enabled: true
+  packages-to-scan: ru.seventech
+
+pass-error-trace: true
+
+mdm-adapter:
+  catalog-items-search-url-v2: /api/v2/catalogs/{catalogIdentifier}/items/search
+  catalog-item-url-v2: /api/v2/catalogs/{catalogIdentifier}/items/{uuid}
+
+notify-api-adapter:
+  notify-url: api/v2/notify
+
+
+
+base-json-path: "jsons/catalog-models/"
