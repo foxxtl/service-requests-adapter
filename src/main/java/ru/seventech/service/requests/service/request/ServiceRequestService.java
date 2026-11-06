@@ -1,22 +1,27 @@
 package ru.seventech.service.requests.service.request;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
-import ru.seventech.basetemplate.error.CustomMessageException;
 import ru.seventech.basetemplate.util.BaseSecurityHelper;
-import ru.seventech.service.requests.dto.NoticeErrorDto;
-import ru.seventech.service.requests.dto.ServiceDto;
-import ru.seventech.service.requests.dto.mdm.ItemParamsRequestDTO;
+import ru.seventech.service.requests.dto.NoticeRequestDto;
 import ru.seventech.service.requests.dto.ProviderDto;
+import ru.seventech.service.requests.dto.ServiceDto;
+import ru.seventech.service.requests.dto.ServiceReqAddValuesDto;
+import ru.seventech.service.requests.dto.enums.CatalogNames;
+import ru.seventech.service.requests.dto.mdm.ItemParamsRequestDTO;
 import ru.seventech.service.requests.service.BaseService;
+import ru.seventech.service.requests.service.PlaceholderRenderer;
+import ru.seventech.service.requests.service.mdm.MdmApiService;
 import ru.seventech.service.requests.service.mdm.SearchService;
 import ru.seventech.service.requests.service.notify.NotificationService;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,39 +32,86 @@ import java.util.stream.Collectors;
 @Service
 public class ServiceRequestService extends BaseService {
 
+    private final MdmApiService mdmApiService;
     private final NotificationService notificationService;
+    private final PlaceholderRenderer placeholderRenderer;
 
-    private final String NOTICE_ERROR_MESSAGE = "При отправке уведомления произошла ошибка";
-    private final String NO_CONTACT_PERSON = "У Провайдера отсутствует контактное лицо";
+    private final String NO_CONTACT_PERSON = "По услуге ${productName} (Код продукта: ${productNumber}) не найдено контактное лицо Провайдера";
+    private final String NOTICE_ERROR_MESSAGE = "По услуге ${productName} (Код продукта: ${productNumber}) не удалось отправить уведомление контактному лицу Провайдера на email ${contactEmail}";
+    private final String EMPTY_SERVICE_LIST_MESSAGE = "По выбранным услугам не отправлено ни одного уведомления.";
+    private final String EMPTY_REQUEST_DTO = "Не выбрана ни одна услуга для отправки уведомлений.";
 
     public ServiceRequestService(BaseSecurityHelper securityHelper, RestTemplate rest,
-                                 SearchService searchService, NotificationService notificationService) {
+                                 SearchService searchService, NotificationService notificationService,
+                                 MdmApiService mdmApiService, PlaceholderRenderer placeholderRenderer) {
         super(searchService, securityHelper, rest);
         this.notificationService = notificationService;
+        this.mdmApiService = mdmApiService;
+        this.placeholderRenderer = placeholderRenderer;
     }
 
-    public void notice(List<UUID> uuidList) {
-        List<NoticeErrorDto> sendErrorsArray = new ArrayList<>();
+    public void notice(NoticeRequestDto noticeRequestDto) {
+        List<String> sendErrorsArray = new ArrayList<>();
 
-        List<ServiceDto> serviceList = searchService.searchServices(Map.of("uuid_in", uuidList));
+        if (CollectionUtils.isEmpty(noticeRequestDto.getUuidList())) {
+            sendErrorsArray.add(EMPTY_REQUEST_DTO);
+            notificationService.sendSimpleEmail(getUserEmail(), "armProviderActualizationNoticeReport", Map.of("sendErrorsArray", sendErrorsArray));
+            return;
+        }
+
+        List<ServiceDto> serviceList = searchService.searchServices(Map.of("uuid_in", noticeRequestDto.getUuidList()));
+
+        if (CollectionUtils.isEmpty(serviceList)) {
+            sendErrorsArray.add(EMPTY_SERVICE_LIST_MESSAGE);
+        }
+
         for (ServiceDto serviceDto : serviceList) {
+            List<String> mainEmails = serviceDto.getMainEmails();
 
-            //TODO: тут нет email адреса.
-            //TODO: в цепочке может быть NPE (?)
-            String email = serviceDto.getOrgId().getContactPerson();
-            if (StringUtils.isNotBlank(email)) {
-                try {
-                    notificationService.sendEmail(email, "service_update_notice", null);
-                } catch (CustomMessageException e) {
-                    log.error("Ошибка при отправке email уведомления пользователю {}. Error message: {}", email, e.getMessage(), e);
-                    sendErrorsArray.add(new NoticeErrorDto(serviceDto, NOTICE_ERROR_MESSAGE));
+            if (!CollectionUtils.isEmpty(mainEmails)) {
+                for (String email : mainEmails) {
+                    try {
+                        notificationService.sendEmail(email, "armProviderNeedActualization", noticeRequestDto.getNoticeText());
+                    } catch (Exception e) {
+                        log.error("Error while sending email", e);
+                        sendErrorsArray.add(placeholderRenderer.render(NOTICE_ERROR_MESSAGE, getErrorNoticePlaceholders(serviceDto, email)));
+                    }
+                    updateServiceReqAddValues(serviceDto.getUuid());
                 }
             } else {
-                sendErrorsArray.add(new NoticeErrorDto(serviceDto, NO_CONTACT_PERSON));
+                sendErrorsArray.add(placeholderRenderer.render(NO_CONTACT_PERSON, getSdPlaceholders(serviceDto)));
             }
         }
-        //TODO: точно ли корректно добавятся все параметры в письмо?
-        notificationService.sendEmail(getUserEmail(), "service_update_notice_report", sendErrorsArray);
+
+        notificationService.sendEmail(getUserEmail(), "armProviderActualizationNoticeReport ", sendErrorsArray);
+    }
+
+    private void updateServiceReqAddValues(UUID serviceUuid){
+        List<ServiceReqAddValuesDto> serviceReqAdd = searchService.searchServiceReqAddValues(Map.of("serviceId", serviceUuid));
+        if (!CollectionUtils.isEmpty(serviceReqAdd)) {
+            ServiceReqAddValuesDto item = serviceReqAdd.get(0);
+            item.setNoticeSendDate(LocalDate.now());
+            mdmApiService.updateCatalogItem(CatalogNames.SERVICE_REQ_ADD_VALUES.getOrigin(), item.getUuid(), item, new ParameterizedTypeReference<>() {
+            });
+        } else {
+            ServiceReqAddValuesDto item = new ServiceReqAddValuesDto(serviceUuid, LocalDate.now());
+            mdmApiService.createCatalogItem(CatalogNames.SERVICE_REQ_ADD_VALUES.getOrigin(), item, new ParameterizedTypeReference<>() {
+            });
+        }
+    }
+
+    private Map<String, Object> getErrorNoticePlaceholders(ServiceDto serviceDto, String email) {
+        Map<String, Object> placeholders = getSdPlaceholders(serviceDto);
+        placeholders.put("contactEmail", email);
+        return placeholders;
+    }
+
+
+    private Map<String, Object> getSdPlaceholders(ServiceDto serviceDto) {
+        Map<String, Object> placeholders = new HashMap<>();
+        placeholders.put("productName", serviceDto.getProductName());
+        placeholders.put("productNumber", serviceDto.getProductNumber());
+        return placeholders;
     }
 
 

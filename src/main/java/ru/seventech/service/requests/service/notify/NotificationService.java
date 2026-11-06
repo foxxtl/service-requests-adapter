@@ -12,16 +12,20 @@ import org.springframework.web.client.RestTemplate;
 import ru.seventech.basetemplate.util.BaseSecurityHelper;
 import ru.seventech.service.requests.dto.NoticeTemplate;
 import ru.seventech.service.requests.service.BaseService;
+import ru.seventech.service.requests.service.PlaceholderRenderer;
 import ru.seventech.service.requests.service.mdm.SearchService;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Component
 @Slf4j
 public class NotificationService extends BaseService {
 
+    private final PlaceholderRenderer placeholderRenderer;
 
     @Value("${notify-api-adapter.base-url}")
     private String baseUrl;
@@ -29,10 +33,33 @@ public class NotificationService extends BaseService {
     @Value("${notify-api-adapter.notify-url}")
     private String notifyUrl;
 
-    public NotificationService(BaseSecurityHelper securityHelper, SearchService searchService, RestTemplate rest) {
+    public NotificationService(BaseSecurityHelper securityHelper, SearchService searchService, RestTemplate rest, PlaceholderRenderer placeholderRenderer) {
         super(searchService, securityHelper, rest);
+        this.placeholderRenderer = placeholderRenderer;
     }
 
+    /**
+     * Отправка email уведомления о результате обработки 61/62/63 запроса
+     */
+    @SneakyThrows
+    public void sendSimpleEmail(String emailAddress, String templateName, Map<String, Object> placeholders) {
+        NoticeTemplate noticeTemplate = searchService.searchNoticeTemplate(templateName);
+
+        String emailMessage = placeholderRenderer.render(noticeTemplate.getTemplate(), placeholders);
+        String subject = noticeTemplate.getSubject();
+
+        sendMessage(emailAddress, getUserId(), emailMessage, subject);
+        log.info("Email уведомление успешно отправлено по адресу {}", emailAddress);
+    }
+
+
+    @SneakyThrows
+    public void sendEmail(String emailAddress, String templateName, String noticeText) {
+        NoticeTemplate noticeTemplate = searchService.searchNoticeTemplate(templateName);
+
+        sendMessage(emailAddress, getUserId(), noticeText, noticeTemplate.getSubject());
+        log.info("Email уведомление успешно отправлено по адресу {}", emailAddress);
+    }
 
     /**
      * Отправка email уведомления о результате обработки 61/62/63 запроса
@@ -41,10 +68,10 @@ public class NotificationService extends BaseService {
     public void sendEmail(String emailAddress, String templateName, Object parameters) {
         NoticeTemplate noticeTemplate = searchService.searchNoticeTemplate(templateName);
 
-//            String emailMessage = placeholderRenderer.render(noticeTemplate.getTemplate(), placeholders);
-//            String subject = placeholderRenderer.render(noticeTemplate.getSubject(), placeholders);
+        String emailMessage = noticeTemplate.getTemplate().replace("${sendErrorsArray}", parameters.toString());
+        String subject = noticeTemplate.getSubject();
 
-        sendMessage(emailAddress, UUID.randomUUID(), noticeTemplate.getTemplate(), noticeTemplate.getSubject());
+        sendMessage(emailAddress, getUserId(), emailMessage, subject);
         log.info("Email уведомление успешно отправлено по адресу {}", emailAddress);
     }
 

@@ -35,6 +35,12 @@ public class MdmApiService extends BaseService {
     @Value("${mdm-adapter.catalog-item-url-v2}")
     private String itemPath;
 
+    @Value("${mdm-adapter.catalog-item}")
+    private String catalogItemPathV1;
+
+    @Value("${mdm-adapter.catalog-item-create}")
+    private String createPath;
+
     public MdmApiService(BaseSecurityHelper securityHelper, RestTemplate rest, CatalogUtil catalogUtil) {
         super(securityHelper, rest);
         this.catalogUtil = catalogUtil;
@@ -60,6 +66,26 @@ public class MdmApiService extends BaseService {
         Map<String, Object> requestBody = Map.of("fetchFields", fetchFields);
 
         return entityAction(requestBody, expand, HttpMethod.POST, headers(true), typeReference);
+    }
+
+    public <T> T updateCatalogItem(String catalogIdentifier, UUID uuid, Object updateDto,
+                                   ParameterizedTypeReference<T> typeReference) {
+        URI expand = getRest().getUriTemplateHandler().expand(mdmAdapterServiceUrl + catalogItemPathV1,
+                ImmutableMap.of("catalogIdentifier", catalogIdentifier, "uuid", uuid));
+
+        Map<String, Object> requestBody = Map.of("fields", updateDto);
+
+        return entityAction(requestBody, expand, HttpMethod.PUT, typeReference);
+    }
+
+    public <T> T createCatalogItem(String catalogIdentifier, Object createDto,
+                                   ParameterizedTypeReference<T> typeReference) {
+        URI expand = getRest().getUriTemplateHandler().expand(mdmAdapterServiceUrl + createPath,
+                ImmutableMap.of("catalogIdentifier", catalogIdentifier));
+
+        Map<String, Object> requestBody = Map.of("fields", createDto);
+
+        return entityAction(requestBody, expand, HttpMethod.POST, typeReference);
     }
     
 }

@@ -106,6 +106,11 @@ public abstract class BaseService {
         return userInfo.getUser().getEmail();
     }
 
+    public UUID getUserId() {
+        UserInfo userInfo = getCurrentUserOnline();
+        return UUID.fromString(userInfo.getUser().getId());
+    }
+
     /**
      * Если пользователь не обладает одной из ролей, он получает доступ только к записям своей организации
      */

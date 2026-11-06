@@ -8,6 +8,7 @@ import org.springframework.util.CollectionUtils;
 import ru.seventech.basetemplate.error.NotFoundException;
 import ru.seventech.service.requests.dto.NoticeTemplate;
 import ru.seventech.service.requests.dto.ServiceDto;
+import ru.seventech.service.requests.dto.ServiceReqAddValuesDto;
 import ru.seventech.service.requests.dto.enums.CatalogNames;
 import ru.seventech.service.requests.dto.mdm.CatalogItemDTO;
 import ru.seventech.service.requests.dto.ProviderDto;
@@ -47,6 +48,12 @@ public class SearchService {
     public ServiceDto getServiceItem(UUID uuid) {
         return mdmApiService.getCatalogItem(CatalogNames.SERVICE.getOrigin(),
                 uuid, new ParameterizedTypeReference<>() {
+                });
+    }
+
+    public List<ServiceReqAddValuesDto> searchServiceReqAddValues(Map<String, Object> filter) {
+        return mdmApiService.searchCatalogItems(CatalogNames.SERVICE_REQ_ADD_VALUES.getOrigin(),
+                filter, new ParameterizedTypeReference<>() {
                 });
     }
 

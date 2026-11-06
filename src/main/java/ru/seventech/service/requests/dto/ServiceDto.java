@@ -6,8 +6,11 @@ import lombok.Getter;
 import lombok.Setter;
 import ru.seventech.service.requests.dto.mdm.CatalogItemDTO;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Getter
 @Setter
@@ -70,5 +73,28 @@ public class ServiceDto {
     private List<CatalogItemDTO> wayApplicationEKU;
     private List<CatalogItemDTO> legalReasonServEKU;
     private List<CatalogItemDTO> costServiceDescEKU;
+
+    public List<ContactPersonDto> getOrgContactPersons() {
+
+
+        if (Objects.nonNull(orgId)) {
+            return orgId.getContactPerson();
+        }
+        return new ArrayList<>();
+    }
+
+    public List<String> getMainEmails() {
+
+        Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$");
+
+        if (Objects.nonNull(orgId)) {
+            return orgId.getContactPerson().stream()
+                    .filter(ContactPersonDto::isMainContact)
+                    .map(ContactPersonDto::getEmail)
+                    .filter(email -> email != null && EMAIL_PATTERN.matcher(email).matches())
+                    .toList();
+        }
+        return new ArrayList<>();
+    }
 
 }

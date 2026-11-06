@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -16,6 +18,6 @@ public class OrgDto {
     private String inn;
     private String compGroup;
 
-    private String contactPerson;
+    private List<ContactPersonDto> contactPerson = new ArrayList<>();
 
 }

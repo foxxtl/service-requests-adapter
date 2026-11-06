@@ -1,6 +1,7 @@
 package ru.seventech.service.requests.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.seventech.service.requests.dto.NoticeRequestDto;
 import ru.seventech.service.requests.dto.ServiceDto;
 import ru.seventech.service.requests.dto.mdm.ItemParamsRequestDTO;
 import ru.seventech.service.requests.service.request.ServiceRequestService;
@@ -21,15 +23,15 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/api/v1/services")
-@PreAuthorize("@baseSecurityHelper.getCurrentUserOnline().hasAnyRole({'service_req_employee','service_req_chief','service_req_provider'})")
+@PreAuthorize("@baseSecurityHelper.getCurrentUserOnline().hasAnyRole({'service_req_employee','service_req_chief'})")
 public class ServiceController {
 
     private final ServiceRequestService requestService;
 
     @PostMapping("/notice")
     @Operation(summary = "Рассылка уведомлений об актуализации сведений в услугах")
-    public ResponseEntity<HttpStatus> notice(@RequestBody List<UUID> uuidList) {
-        requestService.notice(uuidList);
+    public ResponseEntity<HttpStatus> notice(@RequestBody @Valid NoticeRequestDto noticeRequestDto) {
+        requestService.notice(noticeRequestDto);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

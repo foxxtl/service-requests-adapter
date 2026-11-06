@@ -48,6 +48,8 @@ pass-error-trace: true
 mdm-adapter:
   catalog-items-search-url-v2: /api/v2/catalogs/{catalogIdentifier}/items/search
   catalog-item-url-v2: /api/v2/catalogs/{catalogIdentifier}/items/{uuid}
+  catalog-item: /api/v1/catalogs/{catalogIdentifier}/items/{uuid}
+  catalog-item-create: /api/v1/catalogs/{catalogIdentifier}/items
 
 notify-api-adapter:
   notify-url: api/v2/notify

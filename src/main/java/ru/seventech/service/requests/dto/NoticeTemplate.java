@@ -15,4 +15,6 @@ public class NoticeTemplate {
 
     private String subject;
 
+    private String name;
+
 }
