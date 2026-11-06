@@ -83,7 +83,7 @@ public class ServiceRequestService extends BaseService {
             }
         }
 
-        notificationService.sendEmail(getUserEmail(), "armProviderActualizationNoticeReport ", sendErrorsArray);
+        notificationService.sendEmail(getUserEmail(), "armProviderActualizationNoticeReport", sendErrorsArray);
     }
 
     private void updateServiceReqAddValues(UUID serviceUuid){
