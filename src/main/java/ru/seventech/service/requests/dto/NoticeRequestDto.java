@@ -12,7 +12,6 @@ import java.util.UUID;
 @Setter
 public class NoticeRequestDto {
 
-    @NotBlank
     @Schema(name = "Массив uuid услуг")
     private List<UUID> uuidList;
 

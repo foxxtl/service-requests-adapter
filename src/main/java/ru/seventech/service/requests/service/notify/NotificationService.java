@@ -17,7 +17,6 @@ import ru.seventech.service.requests.service.mdm.SearchService;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -33,46 +32,17 @@ public class NotificationService extends BaseService {
     @Value("${notify-api-adapter.notify-url}")
     private String notifyUrl;
 
-    public NotificationService(BaseSecurityHelper securityHelper, SearchService searchService, RestTemplate rest, PlaceholderRenderer placeholderRenderer) {
+    public NotificationService(BaseSecurityHelper securityHelper, SearchService searchService, RestTemplate rest,
+                               PlaceholderRenderer placeholderRenderer) {
         super(searchService, securityHelper, rest);
         this.placeholderRenderer = placeholderRenderer;
     }
 
-    /**
-     * Отправка email уведомления о результате обработки 61/62/63 запроса
-     */
     @SneakyThrows
-    public void sendSimpleEmail(String emailAddress, String templateName, Map<String, Object> placeholders) {
+    public void sendEmail(String emailAddress, String templateName, String noticeText, Map<String, Object> placeholders) {
         NoticeTemplate noticeTemplate = searchService.searchNoticeTemplate(templateName);
-
-        String emailMessage = placeholderRenderer.render(noticeTemplate.getTemplate(), placeholders);
-        String subject = noticeTemplate.getSubject();
-
-        sendMessage(emailAddress, getUserId(), emailMessage, subject);
-        log.info("Email уведомление успешно отправлено по адресу {}", emailAddress);
-    }
-
-
-    @SneakyThrows
-    public void sendEmail(String emailAddress, String templateName, String noticeText) {
-        NoticeTemplate noticeTemplate = searchService.searchNoticeTemplate(templateName);
-
-        sendMessage(emailAddress, getUserId(), noticeText, noticeTemplate.getSubject());
-        log.info("Email уведомление успешно отправлено по адресу {}", emailAddress);
-    }
-
-    /**
-     * Отправка email уведомления о результате обработки 61/62/63 запроса
-     */
-    @SneakyThrows
-    public void sendEmail(String emailAddress, String templateName, Object parameters) {
-        NoticeTemplate noticeTemplate = searchService.searchNoticeTemplate(templateName);
-
-        String emailMessage = noticeTemplate.getTemplate().replace("${sendErrorsArray}", parameters.toString());
-        String subject = noticeTemplate.getSubject();
-
-        sendMessage(emailAddress, getUserId(), emailMessage, subject);
-        log.info("Email уведомление успешно отправлено по адресу {}", emailAddress);
+        String emailMessage = StringUtils.isBlank(noticeText) ? placeholderRenderer.render(noticeTemplate.getTemplate(), placeholders) : noticeText;
+        sendMessage(emailAddress, getUserId(), emailMessage, noticeTemplate.getSubject());
     }
 
     private void sendMessage(String emailAddress, UUID recipientId, String emailMessage, String subject) throws URISyntaxException {
@@ -85,6 +55,7 @@ public class NotificationService extends BaseService {
         URI uri = builder.build();
 
         getRest().exchange(new RequestEntity<>(wrapText(emailMessage), headers(true), HttpMethod.POST, uri), Object.class);
+        log.info("Email уведомление успешно отправлено по адресу {}", emailAddress);
     }
 
     private Object wrapText(Object text) {

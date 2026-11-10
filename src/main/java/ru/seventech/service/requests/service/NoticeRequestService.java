@@ -23,91 +23,91 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class NoticeRequestService extends BaseService{
+public class NoticeRequestService extends BaseService {
 
     private final MdmApiService mdmApiService;
+    private final SearchService searchService;
     private final NotificationService notificationService;
     private final PlaceholderRenderer placeholderRenderer;
 
     public NoticeRequestService(SearchService searchService, BaseSecurityHelper securityHelper, RestTemplate rest,
-                                MdmApiService mdmApiService, NotificationService notificationService, PlaceholderRenderer placeholderRenderer) {
+                                MdmApiService mdmApiService, NotificationService notificationService,
+                                PlaceholderRenderer placeholderRenderer, SearchService searchService1) {
         super(searchService, securityHelper, rest);
         this.mdmApiService = mdmApiService;
         this.notificationService = notificationService;
         this.placeholderRenderer = placeholderRenderer;
+        this.searchService = searchService1;
     }
 
-    private final String NO_CONTACT_PERSON = "По услуге ${productName} (Код продукта: ${productNumber}) не найдено контактное лицо Провайдера";
-    private final String NOTICE_ERROR_MESSAGE = "По услуге ${productName} (Код продукта: ${productNumber}) не удалось отправить уведомление контактному лицу Провайдера на email ${contactEmail}";
-    private final String EMPTY_SERVICE_LIST_MESSAGE = "По выбранным услугам не отправлено ни одного уведомления.";
+    private final String SUCCESS = "Все уведомления отправлены без ошибок.";
     private final String EMPTY_REQUEST_DTO = "Не выбрана ни одна услуга для отправки уведомлений.";
-
+    private final String EMPTY_SERVICE_LIST = "По выбранным услугам не отправлено ни одного уведомления.";
+    private final String NO_CONTACT_PERSON = "По услуге ${productName} (Код продукта: ${productNumber}) не найдено контактное лицо Провайдера.";
+    private final String ERROR_NOTICE = "По услуге ${productName} (Код продукта: ${productNumber}) не удалось отправить уведомление контактному лицу Провайдера на email ${contactEmail}.";
 
 
     public void notice(NoticeRequestDto noticeRequestDto) {
         List<String> sendErrorsArray = new ArrayList<>();
 
-//        if (CollectionUtils.isEmpty(noticeRequestDto.getUuidList())) {
-//            sendErrorsArray.add(EMPTY_REQUEST_DTO);
-//            notificationService.sendSimpleEmail(getUserEmail(), "armProviderActualizationNoticeReport", Map.of("sendErrorsArray", sendErrorsArray));
-//            return;
-//        }
+        if (CollectionUtils.isEmpty(noticeRequestDto.getUuidList())) {
+            sendErrorsArray.add(EMPTY_REQUEST_DTO);
+        } else {
+            List<ServiceDto> serviceList = searchService.searchServices(Map.of("uuid_in", noticeRequestDto.getUuidList()));
 
-        List<ServiceDto> serviceList = searchService.searchServices(Map.of("uuid_in", noticeRequestDto.getUuidList()));
+            if (CollectionUtils.isEmpty(serviceList)) {
+                sendErrorsArray.add(EMPTY_SERVICE_LIST);
+            }
 
-        if (CollectionUtils.isEmpty(serviceList)) {
-            sendErrorsArray.add(EMPTY_SERVICE_LIST_MESSAGE);
-        }
+            for (ServiceDto serviceDto : serviceList) {
+                List<String> contactEmails = serviceDto.getContactEmails();
 
-        for (ServiceDto serviceDto : serviceList) {
-            List<String> mainEmails = serviceDto.getMainEmails();
-
-            if (!CollectionUtils.isEmpty(mainEmails)) {
-                for (String email : mainEmails) {
-                    try {
-                        notificationService.sendEmail(email, "armProviderNeedActualization", noticeRequestDto.getNoticeText());
-                    } catch (Exception e) {
-                        log.error("Error while sending email", e);
-                        sendErrorsArray.add(placeholderRenderer.render(NOTICE_ERROR_MESSAGE, getErrorNoticePlaceholders(serviceDto, email)));
+                if (!CollectionUtils.isEmpty(contactEmails)) {
+                    for (String email : contactEmails) {
+                        try {
+                            notificationService.sendEmail(email, "armProviderNeedActualization", noticeRequestDto.getNoticeText(), Map.of());
+                        } catch (Exception e) {
+                            log.error("Error while sending email", e);
+                            sendErrorsArray.add(placeholderRenderer.render(ERROR_NOTICE, getErrorNoticePlaceholders(serviceDto, email)));
+                        }
+                        updateServiceReqAddValues(serviceDto.getUuid());
                     }
-                    updateServiceReqAddValues(serviceDto.getUuid());
+                } else {
+                    sendErrorsArray.add(placeholderRenderer.render(NO_CONTACT_PERSON, getServiceInfoPlaceholders(serviceDto)));
                 }
-            } else {
-                sendErrorsArray.add(placeholderRenderer.render(NO_CONTACT_PERSON, getSdPlaceholders(serviceDto)));
+            }
+            if (CollectionUtils.isEmpty(sendErrorsArray)) {
+                sendErrorsArray.add(SUCCESS);
             }
         }
-
-        notificationService.sendEmail(getUserEmail(), "armProviderActualizationNoticeReport", sendErrorsArray);
+        notificationService.sendEmail(getUserEmail(), "armProviderActualizationNoticeReport", null, Map.of("sendErrorsArray", sendErrorsArray));
     }
 
     private void updateServiceReqAddValues(UUID serviceUuid) {
         List<ServiceReqAddValuesDto> serviceReqAdd = searchService.searchServiceReqAddValues(Map.of("serviceId", serviceUuid));
-        if (!CollectionUtils.isEmpty(serviceReqAdd)) {
+        if (CollectionUtils.isEmpty(serviceReqAdd)) {
+            ServiceReqAddValuesDto item = new ServiceReqAddValuesDto(serviceUuid, LocalDate.now());
+            mdmApiService.createCatalogItem(CatalogNames.SERVICE_REQ_ADD_VALUES.getOrigin(), item, new ParameterizedTypeReference<>() {
+            });
+        } else {
             ServiceReqAddValuesDto item = serviceReqAdd.get(0);
             item.setNoticeSendDate(LocalDate.now());
             mdmApiService.updateCatalogItem(CatalogNames.SERVICE_REQ_ADD_VALUES.getOrigin(), item.getUuid(), item, new ParameterizedTypeReference<>() {
-            });
-        } else {
-            ServiceReqAddValuesDto item = new ServiceReqAddValuesDto(serviceUuid, LocalDate.now());
-            mdmApiService.createCatalogItem(CatalogNames.SERVICE_REQ_ADD_VALUES.getOrigin(), item, new ParameterizedTypeReference<>() {
             });
         }
     }
 
     private Map<String, Object> getErrorNoticePlaceholders(ServiceDto serviceDto, String email) {
-        Map<String, Object> placeholders = getSdPlaceholders(serviceDto);
+        Map<String, Object> placeholders = getServiceInfoPlaceholders(serviceDto);
         placeholders.put("contactEmail", email);
         return placeholders;
     }
 
-
-    private Map<String, Object> getSdPlaceholders(ServiceDto serviceDto) {
+    private Map<String, Object> getServiceInfoPlaceholders(ServiceDto serviceDto) {
         Map<String, Object> placeholders = new HashMap<>();
         placeholders.put("productName", serviceDto.getProductName());
         placeholders.put("productNumber", serviceDto.getProductNumber());
         return placeholders;
     }
-
-
 
 }
