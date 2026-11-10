@@ -12,10 +12,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.seventech.service.requests.dto.ItemSearchRequestDto;
 import ru.seventech.service.requests.dto.NoticeRequestDto;
 import ru.seventech.service.requests.dto.ServiceDto;
-import ru.seventech.service.requests.dto.mdm.ItemParamsRequestDTO;
-import ru.seventech.service.requests.service.request.ServiceRequestService;
+import ru.seventech.service.requests.service.NoticeRequestService;
+import ru.seventech.service.requests.service.request.ServiceResearchService;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,24 +27,26 @@ import java.util.UUID;
 @PreAuthorize("@baseSecurityHelper.getCurrentUserOnline().hasAnyRole({'service_req_employee','service_req_chief'})")
 public class ServiceController {
 
-    private final ServiceRequestService requestService;
+    private final ServiceResearchService researchService;
+    private final NoticeRequestService noticeRequestService;
 
     @PostMapping("/notice")
     @Operation(summary = "Рассылка уведомлений об актуализации сведений в услугах")
     public ResponseEntity<HttpStatus> notice(@RequestBody @Valid NoticeRequestDto noticeRequestDto) {
-        requestService.notice(noticeRequestDto);
+        noticeRequestService.notice(noticeRequestDto);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @PostMapping("/search")
     @Operation(summary = "Получение перечня услуг, доступных пользователю")
-    public List<ServiceDto> search(@RequestBody ItemParamsRequestDTO requestDTO) {
-        return requestService.search(requestDTO);
+    @PreAuthorize("@baseSecurityHelper.getCurrentUserOnline().hasAnyRole({'service_req_provider'})")
+    public List<ServiceDto> search(@RequestBody ItemSearchRequestDto requestDTO) {
+        return researchService.search(requestDTO);
     }
 
     @GetMapping("/{uuid}")
     @Operation(summary = "Получение данных услуги, доступной пользователю")
     public ServiceDto get(@PathVariable UUID uuid) {
-        return requestService.getItem(uuid);
+        return researchService.getItem(uuid);
     }
 }

@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -12,4 +14,6 @@ import lombok.Setter;
 public class ProviderDto {
 
     private OrgDto orgProviderId;
+
+    private UUID serviceId;
 }

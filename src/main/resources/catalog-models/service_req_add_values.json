@@ -1,0 +1,7 @@
+{
+  "fetchFields": [
+    "serviceActualizeDate",
+    "noticeSendDate",
+    "serviceId"
+  ]
+}

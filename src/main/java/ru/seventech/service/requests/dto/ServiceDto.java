@@ -7,6 +7,7 @@ import lombok.Setter;
 import ru.seventech.service.requests.dto.mdm.CatalogItemDTO;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -37,7 +38,7 @@ public class ServiceDto {
     private String subsideGoal;
     private String nameGRBS;
     private String description;
-    private String publicPortalEKU;
+    private PortalEku publicPortalEKU;
     private String result;
     private String shortNameGRBS;
     private String subsideRecipientsSelection;
@@ -74,13 +75,20 @@ public class ServiceDto {
     private List<CatalogItemDTO> legalReasonServEKU;
     private List<CatalogItemDTO> costServiceDescEKU;
 
+    public UUID getOrgUuid() {
+        if (Objects.nonNull(orgId)) {
+            return orgId.getUuid();
+        }
+        return null;
+    }
+
     public List<ContactPersonDto> getOrgContactPersons() {
 
 
         if (Objects.nonNull(orgId)) {
             return orgId.getContactPerson();
         }
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
 
     public List<String> getMainEmails() {
@@ -94,7 +102,7 @@ public class ServiceDto {
                     .filter(email -> email != null && EMAIL_PATTERN.matcher(email).matches())
                     .toList();
         }
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
 
 }

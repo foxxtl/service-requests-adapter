@@ -116,7 +116,7 @@ public abstract class BaseService {
      */
     public boolean requiredUserOrgFilter() {
         UserInfo userInfo = getCurrentUserOnline();
-        return !userInfo.hasAnyRole(List.of("service_req_employee", "service_req_chief"));
+        return userInfo.hasAnyRole(List.of("service_req_provider"));
     }
 
 }
