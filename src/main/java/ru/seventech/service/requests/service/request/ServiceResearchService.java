@@ -51,14 +51,12 @@ public class ServiceResearchService extends BaseService {
         if (requiredUserOrgFilter() && !Objects.equals(response.getOrgId().getUuid(), getUserOrgId())) {
             throw new AccessDeniedException("Запрашиваемая запись не принадлежит организации");
         }
-
         mapReqAddValues(List.of(response), Collections.emptyList());
         mapProviderField(List.of(response), Collections.emptyList());
         return response;
     }
 
     public List<ServiceDto> search(ItemSearchRequestDto requestDto) {
-
         List<ServiceDto> cacheResult = cacheMap.getIfPresent(new SearchServiceCacheKey(requestDto));
         if (!CollectionUtils.isEmpty(cacheResult)) {
             return cacheResult;
