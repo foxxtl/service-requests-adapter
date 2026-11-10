@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.seventech.service.requests.dto.ItemSearchRequestDto;
 import ru.seventech.service.requests.dto.NoticeRequestDto;
 import ru.seventech.service.requests.dto.ServiceDto;
+import ru.seventech.service.requests.service.ReportService;
 import ru.seventech.service.requests.service.NoticeRequestService;
 import ru.seventech.service.requests.service.request.ServiceResearchService;
 
@@ -23,12 +24,13 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/api/v1/services")
+@RequestMapping(value = "/api/v1/service")
 @PreAuthorize("@baseSecurityHelper.getCurrentUserOnline().hasAnyRole({'service_req_employee','service_req_chief'})")
 public class ServiceController {
 
     private final ServiceResearchService researchService;
     private final NoticeRequestService noticeRequestService;
+    private final ReportService reportService;
 
     @PostMapping("/notice")
     @Operation(summary = "Рассылка уведомлений об актуализации сведений в услугах")
@@ -42,6 +44,13 @@ public class ServiceController {
     @PreAuthorize("@baseSecurityHelper.getCurrentUserOnline().hasAnyRole({'service_req_provider'})")
     public List<ServiceDto> search(@RequestBody ItemSearchRequestDto requestDTO) {
         return researchService.search(requestDTO);
+    }
+
+    @PostMapping("/report")
+    @Operation(summary = "Получение перечня услуг, доступных пользователю")
+    @PreAuthorize("@baseSecurityHelper.getCurrentUserOnline().hasAnyRole({'service_req_provider'})")
+    public byte[] report(@RequestBody ItemSearchRequestDto requestDTO) {
+        return reportService.createXlsReport(requestDTO);
     }
 
     @GetMapping("/{uuid}")

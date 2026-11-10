@@ -48,10 +48,13 @@ public class ServiceResearchService extends BaseService {
 
     public ServiceDto getItem(UUID uuid) {
         ServiceDto response = searchService.getServiceItem(uuid);
-        if (requiredUserOrgFilter() && !Objects.equals(response.getOrgUuid(), getUserOrgId())) {
+        if (requiredUserOrgFilter() && !Objects.equals(response.getOrgId().getUuid(), getUserOrgId())) {
             throw new AccessDeniedException("Запрашиваемая запись не принадлежит организации");
         }
-        return mapProviderField(List.of(response), Collections.emptyList()).get(0);
+
+        mapReqAddValues(List.of(response), Collections.emptyList());
+        mapProviderField(List.of(response), Collections.emptyList());
+        return response;
     }
 
     public List<ServiceDto> search(ItemSearchRequestDto requestDto) {
@@ -62,8 +65,9 @@ public class ServiceResearchService extends BaseService {
         }
 
         Set<UUID> serviceIdList = null;
-        List<ProviderDto> providerDtos = new ArrayList<>();
         List<ServiceDto> serviceList = new ArrayList<>();
+        List<ProviderDto> providerDtos = new ArrayList<>();
+        List<ServiceReqAddValuesDto> reqAddValuesDtos = new ArrayList<>();
 
         boolean hasServiceFilter = !CollectionUtils.isEmpty(requestDto.getServiceFilter());
         boolean hasReqAddValuesFilter = !CollectionUtils.isEmpty(requestDto.getReqAddValuesFilter());
@@ -73,7 +77,7 @@ public class ServiceResearchService extends BaseService {
         boolean hasAnyFilter = hasServiceFilter || hasReqAddValuesFilter || hasChangeRequestFilter;
 
         if (hasReqAddValuesFilter) {
-            List<ServiceReqAddValuesDto> reqAddValuesDtos = searchService.searchServiceReqAddValues(requestDto.getReqAddValuesFilter());
+            reqAddValuesDtos = searchService.searchServiceReqAddValues(requestDto.getReqAddValuesFilter());
 
             if (CollectionUtils.isEmpty(reqAddValuesDtos)) {
                 saveToCache(requestDto, serviceList);
@@ -112,6 +116,7 @@ public class ServiceResearchService extends BaseService {
             return serviceList;
         }
 
+        mapReqAddValues(serviceList, reqAddValuesDtos);
         mapProviderField(serviceList, providerDtos);
         saveToCache(requestDto, serviceList);
         return serviceList;
@@ -145,7 +150,18 @@ public class ServiceResearchService extends BaseService {
         return filter;
     }
 
-    private List<ServiceDto> mapProviderField(List<ServiceDto> serviceList, List<ProviderDto> providerDtos) {
+    private void mapReqAddValues(List<ServiceDto> serviceList, List<ServiceReqAddValuesDto> reqAddValuesDtos) {
+        if (!CollectionUtils.isEmpty(serviceList)) {
+            List<UUID> serviceIds = serviceList.stream().map(ServiceDto::getUuid).toList();
+            if (CollectionUtils.isEmpty(reqAddValuesDtos)) {
+                reqAddValuesDtos = searchService.searchServiceReqAddValues(Map.of("serviceId_in", serviceIds));
+            }
+            Map<UUID, ServiceReqAddValuesDto> providerMap = reqAddValuesDtos.stream().collect(Collectors.toMap(ServiceReqAddValuesDto::getServiceId, item -> item));
+            serviceList.forEach(service -> service.setServiceReqAddValues(providerMap.get(service.getUuid())));
+        }
+    }
+
+    private void mapProviderField(List<ServiceDto> serviceList, List<ProviderDto> providerDtos) {
         if (!CollectionUtils.isEmpty(serviceList)) {
             List<UUID> serviceIds = serviceList.stream().map(ServiceDto::getUuid).toList();
             if (CollectionUtils.isEmpty(providerDtos)) {
@@ -154,7 +170,6 @@ public class ServiceResearchService extends BaseService {
             Map<UUID, ProviderDto> providerMap = providerDtos.stream().collect(Collectors.toMap(ProviderDto::getServiceId, item -> item));
             serviceList.forEach(service -> service.setProviderInfo(providerMap.get(service.getUuid())));
         }
-        return serviceList;
     }
 
 }

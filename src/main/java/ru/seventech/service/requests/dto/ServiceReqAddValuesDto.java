@@ -2,6 +2,7 @@ package ru.seventech.service.requests.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
@@ -9,6 +10,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @Schema(name = "dto справочника service_req_add_values")
 public class ServiceReqAddValuesDto {
 

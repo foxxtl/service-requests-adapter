@@ -6,11 +6,10 @@ import lombok.Getter;
 import lombok.Setter;
 import ru.seventech.service.requests.dto.mdm.CatalogItemDTO;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 @Getter
 @Setter
@@ -59,9 +58,13 @@ public class ServiceDto {
     private List<String> clientCategoryEKU;
     private List<String> branchExpImp;
 
-    private OrgDto orgId;
+    private OrgDto orgId = new OrgDto();
 
-    private ProviderDto providerInfo;
+    @Schema(name = "Данные по связанной записи service_change_request")
+    private ProviderDto providerInfo = new ProviderDto();
+
+    @Schema(name = "Данные по связанной записи service_req_add_values")
+    private ServiceReqAddValuesDto serviceReqAddValues = new ServiceReqAddValuesDto();
 
     // детализации
     private List<CatalogItemDTO> ecmDocs;
@@ -69,26 +72,11 @@ public class ServiceDto {
     private List<CatalogItemDTO> wayResultEKU;
     private List<CatalogItemDTO> regionServEKU;
     private List<CatalogItemDTO> directionVedId;
-    private List<ContactsOrgEkuDto> contactsOrgEKU;
+    private List<ContactsOrgEkuDto> contactsOrgEKU = new ArrayList<>();
     private List<CatalogItemDTO> wayApplicationEKU;
     private List<CatalogItemDTO> legalReasonServEKU;
     private List<CatalogItemDTO> costServiceDescEKU;
 
-    public UUID getOrgUuid() {
-        if (Objects.nonNull(orgId)) {
-            return orgId.getUuid();
-        }
-        return null;
-    }
-
-    public List<ContactPersonDto> getOrgContactPersons() {
-
-
-        if (Objects.nonNull(orgId)) {
-            return orgId.getContactPerson();
-        }
-        return Collections.emptyList();
-    }
 
     public List<String> getContactEmails() {
         return contactsOrgEKU.stream()
