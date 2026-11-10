@@ -25,6 +25,7 @@ import java.util.UUID;
 public class NotificationService extends BaseService {
 
     private final PlaceholderRenderer placeholderRenderer;
+    private final SearchService searchService;
 
     @Value("${notify-api-adapter.base-url}")
     private String baseUrl;
@@ -32,10 +33,11 @@ public class NotificationService extends BaseService {
     @Value("${notify-api-adapter.notify-url}")
     private String notifyUrl;
 
-    public NotificationService(BaseSecurityHelper securityHelper, SearchService searchService, RestTemplate rest,
-                               PlaceholderRenderer placeholderRenderer) {
-        super(searchService, securityHelper, rest);
+    public NotificationService(BaseSecurityHelper securityHelper, RestTemplate rest,
+                               PlaceholderRenderer placeholderRenderer, SearchService searchService) {
+        super(securityHelper, rest);
         this.placeholderRenderer = placeholderRenderer;
+        this.searchService = searchService;
     }
 
     @SneakyThrows

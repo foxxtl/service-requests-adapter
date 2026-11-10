@@ -14,7 +14,6 @@ import ru.seventech.service.requests.dto.mdm.PageResponse;
 import ru.seventech.service.requests.service.BaseService;
 import ru.seventech.service.requests.service.utils.CatalogUtil;
 
-
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +74,7 @@ public class MdmApiService extends BaseService {
 
         Map<String, Object> requestBody = Map.of("fields", updateDto);
 
-        return entityAction(requestBody, expand, HttpMethod.PUT, typeReference);
+        return entityAction(requestBody, expand, HttpMethod.PUT, headers(true), typeReference);
     }
 
     public <T> T createCatalogItem(String catalogIdentifier, Object createDto,
@@ -85,7 +84,7 @@ public class MdmApiService extends BaseService {
 
         Map<String, Object> requestBody = Map.of("fields", createDto);
 
-        return entityAction(requestBody, expand, HttpMethod.POST, typeReference);
+        return entityAction(requestBody, expand, HttpMethod.POST, headers(true), typeReference);
     }
-    
+
 }

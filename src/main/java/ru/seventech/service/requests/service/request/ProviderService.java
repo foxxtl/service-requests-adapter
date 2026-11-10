@@ -20,8 +20,11 @@ import java.util.UUID;
 @Service
 public class ProviderService extends BaseService {
 
+    private final SearchService searchService;
+
     public ProviderService(BaseSecurityHelper securityHelper, RestTemplate rest, SearchService searchService) {
-        super(searchService, securityHelper, rest);
+        super(securityHelper, rest);
+        this.searchService = searchService;
     }
 
     public List<ProviderDto> search(ItemParamsRequestDTO requestDto) {

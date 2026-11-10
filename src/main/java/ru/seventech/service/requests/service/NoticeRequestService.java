@@ -30,14 +30,14 @@ public class NoticeRequestService extends BaseService {
     private final NotificationService notificationService;
     private final PlaceholderRenderer placeholderRenderer;
 
-    public NoticeRequestService(SearchService searchService, BaseSecurityHelper securityHelper, RestTemplate rest,
-                                MdmApiService mdmApiService, NotificationService notificationService,
-                                PlaceholderRenderer placeholderRenderer, SearchService searchService1) {
-        super(searchService, securityHelper, rest);
+    public NoticeRequestService(BaseSecurityHelper securityHelper, RestTemplate rest, MdmApiService mdmApiService,
+                                SearchService searchService, NotificationService notificationService,
+                                PlaceholderRenderer placeholderRenderer) {
+        super(securityHelper, rest);
         this.mdmApiService = mdmApiService;
+        this.searchService = searchService;
         this.notificationService = notificationService;
         this.placeholderRenderer = placeholderRenderer;
-        this.searchService = searchService1;
     }
 
     private final String SUCCESS = "Все уведомления отправлены без ошибок.";

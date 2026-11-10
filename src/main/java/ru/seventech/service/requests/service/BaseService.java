@@ -1,8 +1,7 @@
 package ru.seventech.service.requests.service;
 
 import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -13,7 +12,6 @@ import org.springframework.web.client.RestTemplate;
 import ru.seventech.basetemplate.dto.auth.UserInfo;
 import ru.seventech.basetemplate.util.BaseSecurityHelper;
 import ru.seventech.service.requests.dto.mdm.PageResponse;
-import ru.seventech.service.requests.service.mdm.SearchService;
 
 import java.net.URI;
 import java.util.List;
@@ -25,11 +23,9 @@ import static java.util.Objects.nonNull;
 public abstract class BaseService {
 
     private final RestTemplate rest;
-    protected final SearchService searchService;
     private final BaseSecurityHelper securityHelper;
 
-    public BaseService(SearchService searchService, BaseSecurityHelper securityHelper, RestTemplate rest) {
-        this.searchService = searchService;
+    public BaseService(BaseSecurityHelper securityHelper, RestTemplate rest) {
         this.securityHelper = securityHelper;
         this.rest = rest;
     }

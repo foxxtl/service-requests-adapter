@@ -33,16 +33,15 @@ import java.util.stream.Collectors;
 @Service
 public class ServiceResearchService extends BaseService {
 
-    @Value("${cache.search.time-to-live}")
-    private Duration timeToLive;;
-
-    @Value("${cache.search.capacity}")
-    private int capacity;
+    private final SearchService searchService;
 
     private final Cache<SearchServiceCacheKey, List<ServiceDto>> cacheMap;
 
-    public ServiceResearchService(SearchService searchService, BaseSecurityHelper securityHelper, RestTemplate rest) {
-        super(searchService, securityHelper, rest);
+    public ServiceResearchService(BaseSecurityHelper securityHelper, RestTemplate rest, SearchService searchService,
+                                  @Value("${cache.search.time-to-live}") Duration timeToLive,
+                                  @Value("${cache.search.capacity}") int capacity) {
+        super(securityHelper, rest);
+        this.searchService = searchService;
         this.cacheMap = Caffeine.newBuilder().expireAfterWrite(timeToLive).maximumSize(capacity).build();
     }
 
