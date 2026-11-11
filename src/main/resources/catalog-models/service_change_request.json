@@ -3,6 +3,7 @@
     "requestNumber",
     "startVersion",
     "nextVersion",
+    "createDate",
     {
       "serviceId": [
         "uuid"

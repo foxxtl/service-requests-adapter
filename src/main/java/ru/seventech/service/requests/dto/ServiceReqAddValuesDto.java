@@ -15,7 +15,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-@Schema(name = "dto справочника service_req_add_values")
+@Schema(description = "dto справочника service_req_add_values")
 public class ServiceReqAddValuesDto {
 
     private UUID uuid;

@@ -25,7 +25,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/api/v1/service")
-@PreAuthorize("@baseSecurityHelper.getCurrentUserOnline().hasAnyRole({'service_req_employee','service_req_chief'})")
+//@PreAuthorize("@baseSecurityHelper.getCurrentUserOnline().hasAnyRole({'service_req_employee','service_req_chief'})")
 public class ServiceController {
 
     private final ServiceResearchService researchService;
@@ -41,16 +41,18 @@ public class ServiceController {
 
     @PostMapping("/search")
     @Operation(summary = "Получение перечня услуг, доступных пользователю")
-    @PreAuthorize("@baseSecurityHelper.getCurrentUserOnline().hasAnyRole({'service_req_provider'})")
+//    @PreAuthorize("@baseSecurityHelper.getCurrentUserOnline().hasAnyRole({'service_req_provider'})")
     public List<ServiceDto> search(@RequestBody ItemSearchRequestDto requestDTO) {
         return researchService.search(requestDTO);
     }
 
     @PostMapping("/report")
     @Operation(summary = "Получение перечня услуг, доступных пользователю")
-    @PreAuthorize("@baseSecurityHelper.getCurrentUserOnline().hasAnyRole({'service_req_provider'})")
-    public byte[] report(@RequestBody ItemSearchRequestDto requestDTO) {
-        return reportService.createXlsReport(requestDTO);
+
+//    @PreAuthorize("@baseSecurityHelper.getCurrentUserOnline().hasAnyRole({'service_req_provider'})")
+    public ResponseEntity<byte[]> report(@RequestBody ItemSearchRequestDto requestDTO) {
+        byte[] report = reportService.createXlsReport(requestDTO);
+        return new ResponseEntity<>(report, reportService.reportHeaders(), HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}")

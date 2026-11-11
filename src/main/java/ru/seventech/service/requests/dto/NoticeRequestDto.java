@@ -12,10 +12,10 @@ import java.util.UUID;
 @Setter
 public class NoticeRequestDto {
 
-    @Schema(name = "Массив uuid услуг")
+    @Schema(description = "Массив uuid услуг")
     private List<UUID> uuidList;
 
     @NotBlank
-    @Schema(name = "Текст уведомления")
+    @Schema(description = "Текст уведомления")
     private String noticeText;
 }

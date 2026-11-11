@@ -5,6 +5,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import ru.seventech.service.requests.dto.ItemSearchRequestDto;
 import ru.seventech.service.requests.dto.ProviderDto;
@@ -14,6 +18,7 @@ import ru.seventech.service.requests.service.request.ServiceResearchService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -83,12 +88,28 @@ public class ReportService {
         return isNull(value) ? StringUtils.EMPTY : value.toString();
     }
 
-    public static String dateToString(LocalDate date) {
+    private String dateToString(LocalDate date) {
         return isNull(date) ? StringUtils.EMPTY : date.format(DATE_FORMATTER);
     }
 
-    public static String dateToString(OffsetDateTime date) {
+    private String dateToString(OffsetDateTime date) {
         return isNull(date) ? StringUtils.EMPTY : date.format(DATE_TIME_FORMATTER);
+    }
+
+    public HttpHeaders reportHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setCacheControl(CacheControl.noCache());
+        headers.setContentDisposition(
+                ContentDisposition.attachment()
+                        .filename("Список услуг.xlsx", StandardCharsets.UTF_8)
+                        .build()
+        );
+        headers.setContentType(
+                MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+        );
+        return headers;
     }
 
 }

@@ -13,15 +13,15 @@ import java.util.Map;
 public class ItemSearchRequestDto {
 
     @JsonSetter(nulls = Nulls.SKIP)
-    @Schema(name = "Набор фильтров для справочника service")
+    @Schema(description = "Набор фильтров для справочника service")
     private Map<String, Object> serviceFilter;
 
     @JsonSetter(nulls = Nulls.SKIP)
-    @Schema(name = "Набор фильтров для справочника service_req_add_values")
+    @Schema(description = "Набор фильтров для справочника service_req_add_values")
     private Map<String, Object> reqAddValuesFilter;
 
     @JsonSetter(nulls = Nulls.SKIP)
-    @Schema(name = "Набор фильтров для справочника service_change_request")
+    @Schema(description = "Набор фильтров для справочника service_change_request")
     private Map<String, Object> changeRequestFilter;
 
 }

@@ -56,10 +56,10 @@ public class ServiceDto {
     private OrgDto orgId = new OrgDto();
     private CatalogItemDTO directionVedId;
 
-    @Schema(name = "Данные по связанной записи service_change_request")
+    @Schema(description = "Данные по связанной записи service_change_request")
     private ProviderDto providerInfo;
 
-    @Schema(name = "Данные по связанной записи service_req_add_values")
+    @Schema(description = "Данные по связанной записи service_req_add_values")
     private ServiceReqAddValuesDto serviceReqAddValues;
 
     // значения из списка
