@@ -58,5 +58,7 @@ mdm-adapter:
 notify-api-adapter:
   base-url: https://lk.t.exportcenter.ru/notify-adapter/
 
-storage-url:
-  base-url: http://localhost:8082/docstore
+cache:
+  search:
+    capacity: 100
+    time-to-live: 10m
