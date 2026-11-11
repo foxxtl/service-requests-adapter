@@ -4,23 +4,28 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import ru.seventech.basetemplate.util.BaseSecurityHelper;
 import ru.seventech.service.requests.dto.ItemSearchRequestDto;
+import ru.seventech.service.requests.dto.ServiceSearchDto;
 import ru.seventech.service.requests.dto.enums.service.PortalEku;
 import ru.seventech.service.requests.dto.ProviderDto;
 import ru.seventech.service.requests.dto.SearchServiceCacheKey;
 import ru.seventech.service.requests.dto.ServiceDto;
 import ru.seventech.service.requests.dto.ServiceReqAddValuesDto;
+import ru.seventech.service.requests.dto.mdm.PageResponse;
 import ru.seventech.service.requests.service.BaseService;
 import ru.seventech.service.requests.service.mdm.SearchService;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +40,7 @@ public class ServiceResearchService extends BaseService {
 
     private final SearchService searchService;
 
-    private final Cache<SearchServiceCacheKey, List<ServiceDto>> cacheMap;
+    private final Cache<SearchServiceCacheKey, PageResponse<ServiceSearchDto>> cacheMap;
 
     public ServiceResearchService(BaseSecurityHelper securityHelper, RestTemplate rest, SearchService searchService,
                                   @Value("${cache.search.time-to-live}") Duration timeToLive,
@@ -55,15 +60,15 @@ public class ServiceResearchService extends BaseService {
         return response;
     }
 
-    public List<ServiceDto> search(ItemSearchRequestDto requestDto) {
-        List<ServiceDto> cacheResult = cacheMap.getIfPresent(new SearchServiceCacheKey(requestDto));
-        if (!CollectionUtils.isEmpty(cacheResult)) {
+    public PageResponse<ServiceSearchDto> search(ItemSearchRequestDto requestDto, Pageable pageable) {
+        PageResponse<ServiceSearchDto> cacheResult = cacheMap.getIfPresent(new SearchServiceCacheKey(requestDto, pageable));
+        if (Objects.nonNull(cacheResult)) {
             return cacheResult;
         }
 
         Set<UUID> serviceIdList = null;
-        List<ServiceDto> serviceList = new ArrayList<>();
         List<ProviderDto> providerDtos = new ArrayList<>();
+        PageResponse<ServiceSearchDto> serviceList = new PageResponse<>();
         List<ServiceReqAddValuesDto> reqAddValuesDtos = new ArrayList<>();
 
         boolean hasServiceFilter = !CollectionUtils.isEmpty(requestDto.getServiceFilter());
@@ -77,7 +82,7 @@ public class ServiceResearchService extends BaseService {
             reqAddValuesDtos = searchService.searchServiceReqAddValues(requestDto.getReqAddValuesFilter());
 
             if (CollectionUtils.isEmpty(reqAddValuesDtos)) {
-                saveToCache(requestDto, serviceList);
+                saveToCache(requestDto, serviceList, pageable);
                 return serviceList;
             }
             serviceIdList = reqAddValuesDtos.stream().map(ServiceReqAddValuesDto::getServiceUuid).collect(Collectors.toSet());
@@ -88,7 +93,7 @@ public class ServiceResearchService extends BaseService {
             providerDtos = searchService.searchProviders(filter);
 
             if (CollectionUtils.isEmpty(providerDtos)) {
-                saveToCache(requestDto, serviceList);
+                saveToCache(requestDto, serviceList, pageable);
                 return serviceList;
             }
 
@@ -99,28 +104,28 @@ public class ServiceResearchService extends BaseService {
             } else {
                 serviceIdList.retainAll(providerServiceIds);
                 if (serviceIdList.isEmpty()) {
-                    saveToCache(requestDto, serviceList);
+                    saveToCache(requestDto, serviceList, pageable);
                     return serviceList;
                 }
             }
         }
 
         Map<String, Object> serviceFilter = getServiceFilter(requestDto.getServiceFilter(), hasAnyFilter, serviceIdList);
-        serviceList = searchService.searchServices(serviceFilter);
+        serviceList = searchService.searchServices(serviceFilter, pageable);
 
-        if (CollectionUtils.isEmpty(serviceList)) {
-            saveToCache(requestDto, serviceList);
+        if (CollectionUtils.isEmpty(serviceList.getContent())) {
+            saveToCache(requestDto, serviceList, pageable);
             return serviceList;
         }
-
-        mapReqAddValues(serviceList, reqAddValuesDtos);
-        mapProviderField(serviceList, providerDtos);
-        saveToCache(requestDto, serviceList);
+        sortResult(serviceList.getContent(), pageable);
+        mapReqAddValues(serviceList.getContent(), reqAddValuesDtos);
+        mapProviderField(serviceList.getContent(), providerDtos);
+        saveToCache(requestDto, serviceList, pageable);
         return serviceList;
     }
 
-    private void saveToCache(ItemSearchRequestDto requestDto, List<ServiceDto> serviceList) {
-        cacheMap.put(new SearchServiceCacheKey(requestDto), serviceList);
+    private void saveToCache(ItemSearchRequestDto requestDto, PageResponse<ServiceSearchDto> response, Pageable pageable) {
+        cacheMap.put(new SearchServiceCacheKey(requestDto, pageable), response);
     }
 
     private Map<String, Object> getChangeRequestFilter(Set<UUID> serviceIdList) {
@@ -147,9 +152,9 @@ public class ServiceResearchService extends BaseService {
         return filter;
     }
 
-    private void mapReqAddValues(List<ServiceDto> serviceList, List<ServiceReqAddValuesDto> reqAddValuesDtos) {
+    private void mapReqAddValues(List<ServiceSearchDto> serviceList, List<ServiceReqAddValuesDto> reqAddValuesDtos) {
         if (!CollectionUtils.isEmpty(serviceList)) {
-            List<UUID> serviceIds = serviceList.stream().map(ServiceDto::getUuid).toList();
+            List<UUID> serviceIds = serviceList.stream().map(ServiceSearchDto::getUuid).toList();
             if (CollectionUtils.isEmpty(reqAddValuesDtos)) {
                 reqAddValuesDtos = searchService.searchServiceReqAddValues(Map.of("serviceId_in", serviceIds));
             }
@@ -158,15 +163,54 @@ public class ServiceResearchService extends BaseService {
         }
     }
 
-    private void mapProviderField(List<ServiceDto> serviceList, List<ProviderDto> providerDtos) {
+    private void mapProviderField(List<ServiceSearchDto> serviceList, List<ProviderDto> providerDtos) {
         if (!CollectionUtils.isEmpty(serviceList)) {
-            List<UUID> serviceIds = serviceList.stream().map(ServiceDto::getUuid).toList();
+            List<UUID> serviceIds = serviceList.stream().map(ServiceSearchDto::getUuid).toList();
             if (CollectionUtils.isEmpty(providerDtos)) {
                 providerDtos = searchService.searchProviders(Map.of("serviceId_in", serviceIds));
             }
             Map<UUID, ProviderDto> providerMap = providerDtos.stream().collect(Collectors.toMap(ProviderDto::getServiceUuid, item -> item));
             serviceList.forEach(service -> service.setProviderInfo(providerMap.get(service.getUuid())));
         }
+    }
+
+    private void sortResult(List<ServiceSearchDto> serviceList, Pageable pageable) {
+        if (CollectionUtils.isEmpty(serviceList) || pageable.getSort().isUnsorted()) {
+            return;
+        }
+
+        Comparator<ServiceSearchDto> comparator = null;
+
+        for (Sort.Order order : pageable.getSort()) {
+            Comparator<ServiceSearchDto> currentComparator = getComparatorForProperty(order.getProperty());
+
+            if (currentComparator != null) {
+                if (order.isDescending()) {
+                    currentComparator = currentComparator.reversed();
+                }
+
+                if (comparator == null) {
+                    comparator = currentComparator;
+                } else {
+                    comparator = comparator.thenComparing(currentComparator);
+                }
+            }
+        }
+        if (comparator == null) {
+            return;
+        }
+        serviceList.sort(comparator);
+    }
+
+    private Comparator<ServiceSearchDto> getComparatorForProperty(String property) {
+        return switch (property) {
+            case "orgId" -> Comparator.comparing(ServiceSearchDto::getOrgCaption, Comparator.nullsLast(Comparator.naturalOrder()));
+            case "productName" -> Comparator.comparing(ServiceSearchDto::getProductName, Comparator.nullsLast(Comparator.naturalOrder()));
+            case "productNumber" -> Comparator.comparing(ServiceSearchDto::getProductNumber, Comparator.nullsLast(Comparator.naturalOrder()));
+            case "noticeSendDate" -> Comparator.comparing(ServiceSearchDto::getNoticeSendDate, Comparator.nullsLast(Comparator.naturalOrder()));
+            case "serviceActualizeDate" -> Comparator.comparing(ServiceSearchDto::getServiceActualizeDate, Comparator.nullsLast(Comparator.naturalOrder()));
+            default -> null;
+        };
     }
 
 }

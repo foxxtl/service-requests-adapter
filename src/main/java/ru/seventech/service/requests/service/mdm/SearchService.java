@@ -3,16 +3,17 @@ package ru.seventech.service.requests.service.mdm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import ru.seventech.basetemplate.error.NotFoundException;
 import ru.seventech.service.requests.dto.NoticeTemplate;
+import ru.seventech.service.requests.dto.ProviderDto;
 import ru.seventech.service.requests.dto.ServiceDto;
 import ru.seventech.service.requests.dto.ServiceReqAddValuesDto;
+import ru.seventech.service.requests.dto.ServiceSearchDto;
 import ru.seventech.service.requests.dto.enums.CatalogNames;
-import ru.seventech.service.requests.dto.mdm.CatalogItemDTO;
-import ru.seventech.service.requests.dto.ProviderDto;
-
+import ru.seventech.service.requests.dto.mdm.PageResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,12 @@ public class SearchService {
     public List<ServiceDto> searchServices(Map<String, Object> filter) {
         return mdmApiService.searchCatalogItems(CatalogNames.SERVICE.getOrigin(),
                 filter, new ParameterizedTypeReference<>() {
+                });
+    }
+
+    public PageResponse<ServiceSearchDto> searchServices(Map<String, Object> filter, Pageable pageable) {
+        return mdmApiService.searchPageCatalogItems(CatalogNames.SERVICE.getOrigin(),
+                filter, pageable, new ParameterizedTypeReference<>() {
                 });
     }
 

@@ -4,10 +4,11 @@ import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import ru.seventech.basetemplate.util.BaseSecurityHelper;
 import ru.seventech.service.requests.dto.mdm.ItemParamsRequestDTO;
 import ru.seventech.service.requests.dto.mdm.PageResponse;
@@ -17,6 +18,7 @@ import ru.seventech.service.requests.service.utils.CatalogUtil;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -47,14 +49,30 @@ public class MdmApiService extends BaseService {
 
     public <T> List<T> searchCatalogItems(String catalogIdentifier, Map<String, Object> filter,
                                           ParameterizedTypeReference<PageResponse<T>> typeReference) {
+        PageResponse<T> pageResponse = searchPageCatalogItems(catalogIdentifier, filter, null, typeReference);
+        return pageResponse.getContent();
+    }
+
+    public <T> PageResponse<T> searchPageCatalogItems(String catalogIdentifier, Map<String, Object> filter,
+                                                      ParameterizedTypeReference<PageResponse<T>> typeReference) {
+        return searchPageCatalogItems(catalogIdentifier, filter, null, typeReference);
+    }
+
+    public <T> PageResponse<T> searchPageCatalogItems(String catalogIdentifier, Map<String, Object> filter, Pageable pageable,
+                                                      ParameterizedTypeReference<PageResponse<T>> typeReference) {
         URI expand = getRest().getUriTemplateHandler().expand(mdmAdapterServiceUrl + searchPath,
                 ImmutableMap.of("catalogIdentifier", catalogIdentifier));
 
-        List<Object> fetchFields = catalogUtil.getFetchFields(catalogIdentifier);
-        ItemParamsRequestDTO requestBody = new ItemParamsRequestDTO(filter, fetchFields);
+        if (Objects.nonNull(pageable)) {
+            expand = setPageSizeParams(expand, pageable);
+        }
 
-        return getItemsListAction(requestBody, expand, HttpMethod.POST, headers(true, MediaType.APPLICATION_JSON), typeReference);
+        List<Object> fetchFields = catalogUtil.getFetchFields(catalogIdentifier);
+        ItemParamsRequestDTO paramsRequestDto = new ItemParamsRequestDTO(filter, fetchFields);
+
+        return getPageItemsListAction(paramsRequestDto, expand, HttpMethod.POST, headers(true), typeReference);
     }
+
 
     public <T> T getCatalogItem(String catalogIdentifier, UUID uuid, ParameterizedTypeReference<T> typeReference) {
 
@@ -85,6 +103,24 @@ public class MdmApiService extends BaseService {
         Map<String, Object> requestBody = Map.of("fields", createDto);
 
         return entityAction(requestBody, expand, HttpMethod.POST, headers(true), typeReference);
+    }
+
+    private URI setPageSizeParams(URI expand, Pageable pageable) {
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUri(expand)
+                .queryParam("page", pageable.getPageNumber())
+                .queryParam("size", pageable.getPageSize());
+
+        return uriBuilder.build(true).toUri();
+    }
+
+    private URI setSortParams(URI expand, Pageable pageable) {
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUri(expand);
+
+        pageable.getSort().forEach(order -> {
+            String res = order.getProperty() + "," + order.getDirection().name().toLowerCase();
+            uriBuilder.queryParam("sort", res);
+        });
+        return uriBuilder.build(true).toUri();
     }
 
 }

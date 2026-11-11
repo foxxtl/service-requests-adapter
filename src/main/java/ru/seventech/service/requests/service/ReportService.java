@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -12,8 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import ru.seventech.service.requests.dto.ItemSearchRequestDto;
 import ru.seventech.service.requests.dto.ProviderDto;
-import ru.seventech.service.requests.dto.ServiceDto;
 import ru.seventech.service.requests.dto.ServiceReqAddValuesDto;
+import ru.seventech.service.requests.dto.ServiceSearchDto;
 import ru.seventech.service.requests.service.request.ServiceResearchService;
 
 import java.io.ByteArrayOutputStream;
@@ -46,10 +47,11 @@ public class ReportService {
             "Есть запрос в работе"
     );
 
-    public byte[] createXlsReport(ItemSearchRequestDto requestDTO) {
-        List<ServiceDto> serviceList = serviceResearchService.search(requestDTO);
+    public byte[] createXlsReport(ItemSearchRequestDto requestDTO, Pageable pageable) {
+        List<ServiceSearchDto> serviceList = serviceResearchService.search(requestDTO, pageable).getContent();
 
-        try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+        try (XSSFWorkbook workbook = new XSSFWorkbook();
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
             Sheet sheet = workbook.createSheet("Услуги");
             Row headerRow = sheet.createRow(0);
@@ -59,12 +61,12 @@ public class ReportService {
             }
             int rowIndex = 1;
 
-            for (ServiceDto service : serviceList) {
+            for (ServiceSearchDto service : serviceList) {
                 Row row = sheet.createRow(rowIndex++);
                 row.createCell(0).setCellValue(getStringValue(service.getProductName()));
                 row.createCell(1).setCellValue(getStringValue(service.getProductNumber()));
                 row.createCell(2).setCellValue(getStringValue(service.getPublicPortalEKU().getValue()));
-                row.createCell(3).setCellValue(getStringValue(service.getOrgId().getCaption()));
+                row.createCell(3).setCellValue(getStringValue(service.getOrgCaption()));
 
                 ProviderDto providerInfo = Objects.nonNull(service.getProviderInfo()) ? service.getProviderInfo() : new ProviderDto();
                 ServiceReqAddValuesDto reqAddValuesDto = Objects.nonNull(service.getServiceReqAddValues()) ? service.getServiceReqAddValues() : new ServiceReqAddValuesDto();

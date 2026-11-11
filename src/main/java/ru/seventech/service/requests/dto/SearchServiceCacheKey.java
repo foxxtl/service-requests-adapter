@@ -1,4 +1,6 @@
 package ru.seventech.service.requests.dto;
 
-public record SearchServiceCacheKey(ItemSearchRequestDto requestBody) {
+import org.springframework.data.domain.Pageable;
+
+public record SearchServiceCacheKey(ItemSearchRequestDto requestBody, Pageable pageable) {
 }

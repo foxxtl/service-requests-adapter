@@ -3,9 +3,10 @@ package ru.seventech.service.requests.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,11 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.seventech.service.requests.dto.ItemSearchRequestDto;
 import ru.seventech.service.requests.dto.NoticeRequestDto;
 import ru.seventech.service.requests.dto.ServiceDto;
-import ru.seventech.service.requests.service.ReportService;
+import ru.seventech.service.requests.dto.ServiceSearchDto;
+import ru.seventech.service.requests.dto.mdm.PageResponse;
 import ru.seventech.service.requests.service.NoticeRequestService;
+import ru.seventech.service.requests.service.ReportService;
 import ru.seventech.service.requests.service.request.ServiceResearchService;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -42,16 +44,15 @@ public class ServiceController {
     @PostMapping("/search")
     @Operation(summary = "Получение перечня услуг, доступных пользователю")
 //    @PreAuthorize("@baseSecurityHelper.getCurrentUserOnline().hasAnyRole({'service_req_provider'})")
-    public List<ServiceDto> search(@RequestBody ItemSearchRequestDto requestDTO) {
-        return researchService.search(requestDTO);
+    public PageResponse<ServiceSearchDto> search(@RequestBody ItemSearchRequestDto requestDTO, @ParameterObject Pageable pageable) {
+        return researchService.search(requestDTO, pageable);
     }
 
     @PostMapping("/report")
     @Operation(summary = "Получение перечня услуг, доступных пользователю")
-
 //    @PreAuthorize("@baseSecurityHelper.getCurrentUserOnline().hasAnyRole({'service_req_provider'})")
-    public ResponseEntity<byte[]> report(@RequestBody ItemSearchRequestDto requestDTO) {
-        byte[] report = reportService.createXlsReport(requestDTO);
+    public ResponseEntity<byte[]> report(@RequestBody ItemSearchRequestDto requestDTO, @ParameterObject Pageable pageable) {
+        byte[] report = reportService.createXlsReport(requestDTO, pageable);
         return new ResponseEntity<>(report, reportService.reportHeaders(), HttpStatus.OK);
     }
 

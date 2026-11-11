@@ -3,13 +3,16 @@ package ru.seventech.service.requests.dto;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Value;
 
 import java.util.Map;
 
 @Getter
 @Setter
+@EqualsAndHashCode
 public class ItemSearchRequestDto {
 
     @JsonSetter(nulls = Nulls.SKIP)

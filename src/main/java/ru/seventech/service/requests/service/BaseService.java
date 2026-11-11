@@ -5,11 +5,13 @@ import lombok.Getter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import ru.seventech.basetemplate.dto.auth.UserInfo;
+import ru.seventech.basetemplate.error.CustomMessageException;
 import ru.seventech.basetemplate.util.BaseSecurityHelper;
 import ru.seventech.service.requests.dto.mdm.PageResponse;
 
@@ -76,7 +78,7 @@ public abstract class BaseService {
         return response.getBody();
     }
 
-    public <T> List<T> getItemsListAction(Object requestBody, URI url, HttpMethod method, HttpHeaders headers,
+    public <T> PageResponse<T> getPageItemsListAction(Object requestBody, URI url, HttpMethod method, HttpHeaders headers,
                                           ParameterizedTypeReference<PageResponse<T>> typeReference) {
         ResponseEntity<PageResponse<T>> response = getRest().
                 exchange(
@@ -84,10 +86,7 @@ public abstract class BaseService {
                         typeReference
                 );
 
-        if (nonNull(response.getBody())) {
-            return response.getBody().getContent();
-        }
-        return List.of();
+        return response.getBody();
     }
 
     public UserInfo getCurrentUserOnline() {
