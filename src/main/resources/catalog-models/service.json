@@ -1,5 +1,6 @@
 {
   "fetchFields": [
+    "uuid",
     "caption",
     "interfaceUrl",
     "myExportServiceEKU",
@@ -31,7 +32,7 @@
     "subsideType",
     "subsideUID",
     "idExtService",
-    "serviceActivityEKU",
+    "commentSuspensionService",
     {
       "orgId": [
         "uuid",
@@ -101,7 +102,6 @@
       "regionServEKU": [
         {
           "name": [
-            "code",
             "regionName"
           ]
         }
@@ -109,12 +109,17 @@
     },
     {
       "contactsOrgEKU": [
+        "orderContactsOrgEKU",
+        "division",
         "fullName",
+        "positione",
         "email",
         "phone",
         "address",
         "site",
-        "positione",
+        "contactsAcceptFrom",
+        "contactsAcceptTo",
+        "contactsAcceptComment",
         {
           "organization": [
             "uuid",

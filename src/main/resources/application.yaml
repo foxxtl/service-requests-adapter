@@ -56,4 +56,4 @@ notify-api-adapter:
 
 
 
-base-json-path: "jsons/catalog-models/"
+base-json-path: "catalog-models/"

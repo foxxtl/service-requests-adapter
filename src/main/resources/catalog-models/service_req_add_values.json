@@ -1,7 +1,12 @@
 {
   "fetchFields": [
+    "uuid",
     "serviceActualizeDate",
     "noticeSendDate",
-    "serviceId"
+    {
+      "serviceId": [
+        "uuid"
+      ]
+    }
   ]
 }

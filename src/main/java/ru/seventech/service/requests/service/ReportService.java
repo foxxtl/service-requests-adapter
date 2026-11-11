@@ -7,7 +7,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import ru.seventech.service.requests.dto.ItemSearchRequestDto;
+import ru.seventech.service.requests.dto.ProviderDto;
 import ru.seventech.service.requests.dto.ServiceDto;
+import ru.seventech.service.requests.dto.ServiceReqAddValuesDto;
 import ru.seventech.service.requests.service.request.ServiceResearchService;
 
 import java.io.ByteArrayOutputStream;
@@ -16,6 +18,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Objects.isNull;
 
@@ -57,9 +60,13 @@ public class ReportService {
                 row.createCell(1).setCellValue(getStringValue(service.getProductNumber()));
                 row.createCell(2).setCellValue(getStringValue(service.getPublicPortalEKU().getValue()));
                 row.createCell(3).setCellValue(getStringValue(service.getOrgId().getCaption()));
-                row.createCell(4).setCellValue(dateToString(service.getProviderInfo().getCreateDate()));
-                row.createCell(5).setCellValue(dateToString(service.getServiceReqAddValues().getServiceActualizeDate()));
-                row.createCell(6).setCellValue(getStringValue(service.getProviderInfo().getRequestNumber()));
+
+                ProviderDto providerInfo = Objects.nonNull(service.getProviderInfo()) ? service.getProviderInfo() : new ProviderDto();
+                ServiceReqAddValuesDto reqAddValuesDto = Objects.nonNull(service.getServiceReqAddValues()) ? service.getServiceReqAddValues() : new ServiceReqAddValuesDto();
+
+                row.createCell(4).setCellValue(dateToString(providerInfo.getCreateDate()));
+                row.createCell(5).setCellValue(dateToString(reqAddValuesDto.getServiceActualizeDate()));
+                row.createCell(6).setCellValue(getStringValue(providerInfo.getRequestNumber()));
             }
 
             for (int i = 0; i < HEADERS.size(); i++) {

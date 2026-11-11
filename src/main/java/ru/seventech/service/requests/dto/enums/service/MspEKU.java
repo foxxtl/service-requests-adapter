@@ -1,4 +1,4 @@
-package ru.seventech.service.requests.dto;
+package ru.seventech.service.requests.dto.enums.service;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -7,13 +7,11 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum PortalEku {
+public enum MspEKU {
 
-    NEW(1, "Новая"),
-    EDIT(2, "На редактировании"),
-    READY(3, "Готова к публикации"),
-    PUBLISH(4, "Опубликована"),
-    REMOVE(5, "Снята с публикации");
+    INCLUDE(1, "Входит в реестр МСП"),
+    NOT_INCLUDE(2, "Не входит в реестр МСП"),
+    NO_RESTRICTIONS(3, "Ограничений на вхождение в реестр МСП нет");
 
     private final int id;
     private final String value;
@@ -24,11 +22,10 @@ public enum PortalEku {
     }
 
     @JsonCreator
-    public static PortalEku fromId(int id) {
-        for (PortalEku eku : values()) {
+    public static MspEKU fromId(int id) {
+        for (MspEKU eku : values()) {
             if (eku.id == id) return eku;
         }
         return null;
     }
-
 }

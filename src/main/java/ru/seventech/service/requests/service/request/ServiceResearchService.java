@@ -10,7 +10,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import ru.seventech.basetemplate.util.BaseSecurityHelper;
 import ru.seventech.service.requests.dto.ItemSearchRequestDto;
-import ru.seventech.service.requests.dto.PortalEku;
+import ru.seventech.service.requests.dto.enums.service.PortalEku;
 import ru.seventech.service.requests.dto.ProviderDto;
 import ru.seventech.service.requests.dto.SearchServiceCacheKey;
 import ru.seventech.service.requests.dto.ServiceDto;
@@ -80,7 +80,7 @@ public class ServiceResearchService extends BaseService {
                 saveToCache(requestDto, serviceList);
                 return serviceList;
             }
-            serviceIdList = reqAddValuesDtos.stream().map(ServiceReqAddValuesDto::getServiceId).collect(Collectors.toSet());
+            serviceIdList = reqAddValuesDtos.stream().map(ServiceReqAddValuesDto::getServiceUuid).collect(Collectors.toSet());
         }
 
         if (hasChangeRequestFilter) {
@@ -92,7 +92,7 @@ public class ServiceResearchService extends BaseService {
                 return serviceList;
             }
 
-            Set<UUID> providerServiceIds = providerDtos.stream().map(ProviderDto::getServiceId).collect(Collectors.toSet());
+            Set<UUID> providerServiceIds = providerDtos.stream().map(ProviderDto::getServiceUuid).collect(Collectors.toSet());
 
             if (CollectionUtils.isEmpty(serviceIdList)) {
                 serviceIdList = providerServiceIds;
@@ -153,7 +153,7 @@ public class ServiceResearchService extends BaseService {
             if (CollectionUtils.isEmpty(reqAddValuesDtos)) {
                 reqAddValuesDtos = searchService.searchServiceReqAddValues(Map.of("serviceId_in", serviceIds));
             }
-            Map<UUID, ServiceReqAddValuesDto> providerMap = reqAddValuesDtos.stream().collect(Collectors.toMap(ServiceReqAddValuesDto::getServiceId, item -> item));
+            Map<UUID, ServiceReqAddValuesDto> providerMap = reqAddValuesDtos.stream().collect(Collectors.toMap(ServiceReqAddValuesDto::getServiceUuid, item -> item));
             serviceList.forEach(service -> service.setServiceReqAddValues(providerMap.get(service.getUuid())));
         }
     }
@@ -164,7 +164,7 @@ public class ServiceResearchService extends BaseService {
             if (CollectionUtils.isEmpty(providerDtos)) {
                 providerDtos = searchService.searchProviders(Map.of("serviceId_in", serviceIds));
             }
-            Map<UUID, ProviderDto> providerMap = providerDtos.stream().collect(Collectors.toMap(ProviderDto::getServiceId, item -> item));
+            Map<UUID, ProviderDto> providerMap = providerDtos.stream().collect(Collectors.toMap(ProviderDto::getServiceUuid, item -> item));
             serviceList.forEach(service -> service.setProviderInfo(providerMap.get(service.getUuid())));
         }
     }

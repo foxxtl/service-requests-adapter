@@ -3,7 +3,11 @@
     "requestNumber",
     "startVersion",
     "nextVersion",
-    "serviceId",
+    {
+      "serviceId": [
+        "uuid"
+      ]
+    },
     {
       "orgProviderId": [
         "uuid",
