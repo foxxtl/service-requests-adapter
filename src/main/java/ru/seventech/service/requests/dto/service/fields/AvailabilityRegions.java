@@ -1,4 +1,4 @@
-package ru.seventech.service.requests.dto.enums.service;
+package ru.seventech.service.requests.dto.service.fields;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

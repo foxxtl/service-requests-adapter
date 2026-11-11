@@ -1,4 +1,4 @@
-package ru.seventech.service.requests.dto.enums.service;
+package ru.seventech.service.requests.dto.service.fields;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -7,10 +7,11 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum SubsideRecSelection {
+public enum BranchExpImp {
 
-    TENDER(1, "Конкурс"),
-    REQUEST(2, "Запрос предложений");
+    INDUSTRY(1, "Промышленность"),
+    APK(2, "АПК"),
+    SERVICE(3, "Услуги");
 
     private final int id;
     private final String value;
@@ -21,9 +22,9 @@ public enum SubsideRecSelection {
     }
 
     @JsonCreator
-    public static SubsideRecSelection fromId(int id) {
-        for (SubsideRecSelection rec : values()) {
-            if (rec.id == id) return rec;
+    public static BranchExpImp fromId(int id) {
+        for (BranchExpImp imp : values()) {
+            if (imp.id == id) return imp;
         }
         return null;
     }

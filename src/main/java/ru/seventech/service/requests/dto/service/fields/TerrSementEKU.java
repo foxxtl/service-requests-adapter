@@ -1,4 +1,4 @@
-package ru.seventech.service.requests.dto.enums.service;
+package ru.seventech.service.requests.dto.service.fields;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -7,11 +7,11 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum BranchExpImp {
+public enum TerrSementEKU {
 
-    INDUSTRY(1, "Промышленность"),
-    APK(2, "АПК"),
-    SERVICE(3, "Услуги");
+    FEDERAL(1, "Федеральный"),
+    REGION(2, "Региональный"),
+    MUNICIPAL(3, "Муниципальный");
 
     private final int id;
     private final String value;
@@ -22,9 +22,9 @@ public enum BranchExpImp {
     }
 
     @JsonCreator
-    public static BranchExpImp fromId(int id) {
-        for (BranchExpImp imp : values()) {
-            if (imp.id == id) return imp;
+    public static TerrSementEKU fromId(int id) {
+        for (TerrSementEKU eku : values()) {
+            if (eku.id == id) return eku;
         }
         return null;
     }

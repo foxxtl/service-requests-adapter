@@ -13,7 +13,7 @@ import ru.seventech.basetemplate.util.BaseSecurityHelper;
 import ru.seventech.service.requests.dto.mdm.ItemParamsRequestDTO;
 import ru.seventech.service.requests.dto.mdm.PageResponse;
 import ru.seventech.service.requests.service.BaseService;
-import ru.seventech.service.requests.service.utils.CatalogUtil;
+import ru.seventech.service.requests.service.utils.MdmEntityToFetchFilterConverterServiceImpl;
 
 import java.net.URI;
 import java.util.List;
@@ -25,7 +25,7 @@ import java.util.UUID;
 @Slf4j
 public class MdmApiService extends BaseService {
 
-    private final CatalogUtil catalogUtil;
+    private final MdmEntityToFetchFilterConverterServiceImpl fetchFilterConverter;
 
     @Value("${mdm-adapter.base-url}")
     private String mdmAdapterServiceUrl;
@@ -42,23 +42,21 @@ public class MdmApiService extends BaseService {
     @Value("${mdm-adapter.catalog-item-create}")
     private String createPath;
 
-    public MdmApiService(BaseSecurityHelper securityHelper, RestTemplate rest, CatalogUtil catalogUtil) {
+    public MdmApiService(BaseSecurityHelper securityHelper, RestTemplate rest,
+                         MdmEntityToFetchFilterConverterServiceImpl fetchFilterConverter) {
         super(securityHelper, rest);
-        this.catalogUtil = catalogUtil;
+        this.fetchFilterConverter = fetchFilterConverter;
     }
 
     public <T> List<T> searchCatalogItems(String catalogIdentifier, Map<String, Object> filter,
+                                          Class<T> clazz, int deepRefs, int deepDetails,
                                           ParameterizedTypeReference<PageResponse<T>> typeReference) {
-        PageResponse<T> pageResponse = searchPageCatalogItems(catalogIdentifier, filter, null, typeReference);
+        PageResponse<T> pageResponse = searchPageCatalogItems(catalogIdentifier, filter, null, clazz, deepRefs, deepDetails, typeReference);
         return pageResponse.getContent();
     }
 
-    public <T> PageResponse<T> searchPageCatalogItems(String catalogIdentifier, Map<String, Object> filter,
-                                                      ParameterizedTypeReference<PageResponse<T>> typeReference) {
-        return searchPageCatalogItems(catalogIdentifier, filter, null, typeReference);
-    }
-
     public <T> PageResponse<T> searchPageCatalogItems(String catalogIdentifier, Map<String, Object> filter, Pageable pageable,
+                                                      Class<T> clazz, int deepRefs, int deepDetails,
                                                       ParameterizedTypeReference<PageResponse<T>> typeReference) {
         URI expand = getRest().getUriTemplateHandler().expand(mdmAdapterServiceUrl + searchPath,
                 ImmutableMap.of("catalogIdentifier", catalogIdentifier));
@@ -67,19 +65,19 @@ public class MdmApiService extends BaseService {
             expand = setPageSizeParams(expand, pageable);
         }
 
-        List<Object> fetchFields = catalogUtil.getFetchFields(catalogIdentifier);
+        List<Object> fetchFields = fetchFilterConverter.convert(clazz, deepRefs, deepDetails);
         ItemParamsRequestDTO paramsRequestDto = new ItemParamsRequestDTO(filter, fetchFields);
 
         return getPageItemsListAction(paramsRequestDto, expand, HttpMethod.POST, headers(true), typeReference);
     }
 
 
-    public <T> T getCatalogItem(String catalogIdentifier, UUID uuid, ParameterizedTypeReference<T> typeReference) {
+    public <T> T getCatalogItem(String catalogIdentifier, UUID uuid,Class<T> clazz, int deepRefs, int deepDetails, ParameterizedTypeReference<T> typeReference) {
 
         URI expand = getRest().getUriTemplateHandler().expand(mdmAdapterServiceUrl + itemPath,
                 ImmutableMap.of("catalogIdentifier", catalogIdentifier, "uuid", uuid));
 
-        List<Object> fetchFields = catalogUtil.getFetchFields(catalogIdentifier);
+        List<Object> fetchFields = fetchFilterConverter.convert(clazz, deepRefs, deepDetails);
         Map<String, Object> requestBody = Map.of("fetchFields", fetchFields);
 
         return entityAction(requestBody, expand, HttpMethod.POST, headers(true), typeReference);

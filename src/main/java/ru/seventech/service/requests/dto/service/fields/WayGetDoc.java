@@ -1,4 +1,4 @@
-package ru.seventech.service.requests.dto.enums.service;
+package ru.seventech.service.requests.dto.service.fields;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -7,11 +7,10 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum TerrSementEKU {
+public enum WayGetDoc {
 
-    FEDERAL(1, "Федеральный"),
-    REGION(2, "Региональный"),
-    MUNICIPAL(3, "Муниципальный");
+    PAPER(1, "Бумажный"),
+    ONLINE(2, "Электронный");
 
     private final int id;
     private final String value;
@@ -22,9 +21,9 @@ public enum TerrSementEKU {
     }
 
     @JsonCreator
-    public static TerrSementEKU fromId(int id) {
-        for (TerrSementEKU eku : values()) {
-            if (eku.id == id) return eku;
+    public static WayGetDoc fromId(int id) {
+        for (WayGetDoc way : values()) {
+            if (way.id == id) return way;
         }
         return null;
     }

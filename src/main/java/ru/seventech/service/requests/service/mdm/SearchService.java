@@ -9,9 +9,9 @@ import org.springframework.util.CollectionUtils;
 import ru.seventech.basetemplate.error.NotFoundException;
 import ru.seventech.service.requests.dto.NoticeTemplate;
 import ru.seventech.service.requests.dto.ProviderDto;
-import ru.seventech.service.requests.dto.ServiceDto;
+import ru.seventech.service.requests.dto.service.ServiceDto;
 import ru.seventech.service.requests.dto.ServiceReqAddValuesDto;
-import ru.seventech.service.requests.dto.ServiceSearchDto;
+import ru.seventech.service.requests.dto.service.ServiceSearchDto;
 import ru.seventech.service.requests.dto.enums.CatalogNames;
 import ru.seventech.service.requests.dto.mdm.PageResponse;
 
@@ -30,44 +30,46 @@ public class SearchService {
 
     public List<ProviderDto> searchProviders(Map<String, Object> filter) {
         return mdmApiService.searchCatalogItems(CatalogNames.SERVICE_CHANGE_REQUEST.getOrigin(),
-                filter, new ParameterizedTypeReference<>() {
+                filter, ProviderDto.class, 1, 0, new ParameterizedTypeReference<>() {
                 });
     }
 
     public ProviderDto getProviderItem(UUID uuid) {
         return mdmApiService.getCatalogItem(CatalogNames.SERVICE_CHANGE_REQUEST.getOrigin(),
-                uuid, new ParameterizedTypeReference<>() {
+                uuid, ProviderDto.class, 1, 0,
+                new ParameterizedTypeReference<>() {
                 });
     }
 
     public List<ServiceDto> searchServices(Map<String, Object> filter) {
         return mdmApiService.searchCatalogItems(CatalogNames.SERVICE.getOrigin(),
-                filter, new ParameterizedTypeReference<>() {
+                filter, ServiceDto.class, 1, 1, new ParameterizedTypeReference<>() {
                 });
     }
 
     public PageResponse<ServiceSearchDto> searchServices(Map<String, Object> filter, Pageable pageable) {
         return mdmApiService.searchPageCatalogItems(CatalogNames.SERVICE.getOrigin(),
-                filter, pageable, new ParameterizedTypeReference<>() {
+                filter, pageable, ServiceSearchDto.class, 1, 0,
+                new ParameterizedTypeReference<>() {
                 });
     }
 
     public ServiceDto getServiceItem(UUID uuid) {
         return mdmApiService.getCatalogItem(CatalogNames.SERVICE.getOrigin(),
-                uuid, new ParameterizedTypeReference<>() {
+                uuid, ServiceDto.class, 1, 1, new ParameterizedTypeReference<>() {
                 });
     }
 
     public List<ServiceReqAddValuesDto> searchServiceReqAddValues(Map<String, Object> filter) {
         return mdmApiService.searchCatalogItems(CatalogNames.SERVICE_REQ_ADD_VALUES.getOrigin(),
-                filter, new ParameterizedTypeReference<>() {
+                filter, ServiceReqAddValuesDto.class, 1, 0, new ParameterizedTypeReference<>() {
                 });
     }
 
 
     public NoticeTemplate searchNoticeTemplate(String name) {
         List<NoticeTemplate> template = mdmApiService.searchCatalogItems(CatalogNames.NOTICE_TEMPLATE.getOrigin(),
-                Map.of("name", name), new ParameterizedTypeReference<>() {
+                Map.of("name", name), NoticeTemplate.class, 0, 0, new ParameterizedTypeReference<>() {
                 });
         return getFirstOrThrowEx(template, () -> new NotFoundException("В справочнике notice_template не найден шаблон для отправки email уведомления. name: ", name));
     }

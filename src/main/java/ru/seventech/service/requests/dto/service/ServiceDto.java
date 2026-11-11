@@ -1,19 +1,28 @@
-package ru.seventech.service.requests.dto;
+package ru.seventech.service.requests.dto.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
-import ru.seventech.service.requests.dto.enums.service.AvailabilityRegions;
-import ru.seventech.service.requests.dto.enums.service.BranchExpImp;
-import ru.seventech.service.requests.dto.enums.service.ClientCategoryEKU;
-import ru.seventech.service.requests.dto.enums.service.MspEKU;
-import ru.seventech.service.requests.dto.enums.service.SubsideRecSelection;
-import ru.seventech.service.requests.dto.enums.service.SubsideType;
-import ru.seventech.service.requests.dto.enums.service.TerrSementEKU;
-import ru.seventech.service.requests.dto.enums.service.TypeServicePayment;
+import ru.seventech.service.requests.dto.ContactsOrgEkuDto;
+import ru.seventech.service.requests.dto.service.detail.ClientDocs;
+import ru.seventech.service.requests.dto.service.detail.CostServiceDescEKU;
+import ru.seventech.service.requests.dto.service.detail.EcmDocs;
+import ru.seventech.service.requests.dto.service.detail.LegalReasonServEKU;
+import ru.seventech.service.requests.dto.service.detail.RegionServEKU;
+import ru.seventech.service.requests.dto.service.detail.WayApplicationEKU;
+import ru.seventech.service.requests.dto.service.detail.WayResultEKU;
+import ru.seventech.service.requests.dto.service.fields.AvailabilityRegions;
+import ru.seventech.service.requests.dto.service.fields.BranchExpImp;
+import ru.seventech.service.requests.dto.service.fields.ClientCategoryEKU;
+import ru.seventech.service.requests.dto.service.fields.MspEKU;
+import ru.seventech.service.requests.dto.service.fields.SubsideRecSelection;
+import ru.seventech.service.requests.dto.service.fields.SubsideType;
+import ru.seventech.service.requests.dto.service.fields.TerrSementEKU;
+import ru.seventech.service.requests.dto.service.fields.TypeServicePayment;
 import ru.seventech.service.requests.dto.mdm.CatalogItemDTO;
+import ru.seventech.service.requests.dto.annotation.NotFetch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +59,7 @@ public class ServiceDto extends ServiceSearchDto {
     private Boolean serviceActivityEKU;
 
     // ссылка
-    private CatalogItemDTO directionVedId;
+    private DirectionVedId directionVedId;
 
     // значения из списка
     private MspEKU mspEKU;
@@ -63,15 +72,16 @@ public class ServiceDto extends ServiceSearchDto {
     private SubsideRecSelection subsideRecipientsSelection;
 
     // детализации
-    private List<CatalogItemDTO> ecmDocs;
-    private List<CatalogItemDTO> clientDocs;
-    private List<CatalogItemDTO> wayResultEKU;
-    private List<CatalogItemDTO> regionServEKU;
-    private List<CatalogItemDTO> wayApplicationEKU;
-    private List<CatalogItemDTO> legalReasonServEKU;
-    private List<CatalogItemDTO> costServiceDescEKU;
+    private List<EcmDocs> ecmDocs;
+    private List<ClientDocs> clientDocs;
+    private List<WayResultEKU> wayResultEKU;
+    private List<RegionServEKU> regionServEKU;
+    private List<WayApplicationEKU> wayApplicationEKU;
+    private List<LegalReasonServEKU> legalReasonServEKU;
+    private List<CostServiceDescEKU> costServiceDescEKU;
     private List<ContactsOrgEkuDto> contactsOrgEKU = new ArrayList<>();
 
+    @NotFetch
     @JsonIgnore
     public List<String> getContactEmails() {
         return contactsOrgEKU.stream()

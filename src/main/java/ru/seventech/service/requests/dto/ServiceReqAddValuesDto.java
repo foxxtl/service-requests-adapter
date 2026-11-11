@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.seventech.service.requests.dto.mdm.CatalogItemDTO;
+import ru.seventech.service.requests.dto.annotation.NotFetch;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -34,6 +35,7 @@ public class ServiceReqAddValuesDto {
         this.noticeSendDate = noticeSendDate;
     }
 
+    @NotFetch
     @JsonIgnore
     public UUID getServiceUuid() {
         return Objects.nonNull(serviceId) ? serviceId.getUuid() : null;

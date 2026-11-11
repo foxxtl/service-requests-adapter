@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import ru.seventech.service.requests.dto.mdm.CatalogItemDTO;
+import ru.seventech.service.requests.dto.annotation.NotFetch;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -40,6 +41,7 @@ public class ProviderDto {
     private LocalDate finishDate;
 
 
+    @NotFetch
     @JsonIgnore
     public UUID getServiceUuid() {
         return Objects.nonNull(serviceId) ? serviceId.getUuid() : null;

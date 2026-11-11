@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import ru.seventech.service.requests.dto.ItemSearchRequestDto;
 import ru.seventech.service.requests.dto.ProviderDto;
 import ru.seventech.service.requests.dto.ServiceReqAddValuesDto;
-import ru.seventech.service.requests.dto.ServiceSearchDto;
+import ru.seventech.service.requests.dto.service.ServiceSearchDto;
 import ru.seventech.service.requests.service.request.ServiceResearchService;
 
 import java.io.ByteArrayOutputStream;
