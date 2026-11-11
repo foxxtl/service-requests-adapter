@@ -25,7 +25,7 @@ public class ServiceSearchDto {
 
     private PortalEku publicPortalEKU;
 
-    private OrgDto orgId = new OrgDto();
+    private OrgDto orgId;
 
     @Schema(description = "Данные по связанной записи service_change_request")
     private ProviderDto providerInfo;
@@ -36,6 +36,11 @@ public class ServiceSearchDto {
     @JsonIgnore
     public String getOrgCaption() {
         return Objects.nonNull(orgId) ? orgId.getCaption() : "";
+    }
+
+    @JsonIgnore
+    public UUID getOrgUuid() {
+        return Objects.nonNull(orgId) ? orgId.getUuid() : null;
     }
 
     @JsonIgnore

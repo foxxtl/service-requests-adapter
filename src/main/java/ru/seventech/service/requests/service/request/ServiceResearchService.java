@@ -52,7 +52,7 @@ public class ServiceResearchService extends BaseService {
 
     public ServiceDto getItem(UUID uuid) {
         ServiceDto response = searchService.getServiceItem(uuid);
-        if (requiredUserOrgFilter() && !Objects.equals(response.getOrgId().getUuid(), getUserOrgId())) {
+        if (requiredUserOrgFilter() && !Objects.equals(response.getOrgUuid(), getUserOrgId())) {
             throw new AccessDeniedException("Запрашиваемая запись не принадлежит организации");
         }
         mapReqAddValues(List.of(response), Collections.emptyList());
