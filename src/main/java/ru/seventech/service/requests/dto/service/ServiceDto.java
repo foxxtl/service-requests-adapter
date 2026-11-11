@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
-import ru.seventech.service.requests.dto.ContactsOrgEkuDto;
+import ru.seventech.service.requests.dto.service.detail.ContactsOrgEkuDto;
 import ru.seventech.service.requests.dto.service.detail.ClientDocs;
 import ru.seventech.service.requests.dto.service.detail.CostServiceDescEKU;
 import ru.seventech.service.requests.dto.service.detail.EcmDocs;
@@ -21,7 +21,6 @@ import ru.seventech.service.requests.dto.service.fields.SubsideRecSelection;
 import ru.seventech.service.requests.dto.service.fields.SubsideType;
 import ru.seventech.service.requests.dto.service.fields.TerrSementEKU;
 import ru.seventech.service.requests.dto.service.fields.TypeServicePayment;
-import ru.seventech.service.requests.dto.mdm.CatalogItemDTO;
 import ru.seventech.service.requests.dto.annotation.NotFetch;
 
 import java.util.ArrayList;

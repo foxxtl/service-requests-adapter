@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.seventech.service.requests.dto.mdm.ItemParamsRequestDTO;
-import ru.seventech.service.requests.dto.ProviderDto;
+import ru.seventech.service.requests.dto.service.ProviderDto;
 import ru.seventech.service.requests.service.request.ProviderService;
 
 import java.util.List;

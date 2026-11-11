@@ -1,4 +1,4 @@
-package ru.seventech.service.requests.dto;
+package ru.seventech.service.requests.dto.service.detail;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@Schema(description = "DTO справочника org")
+@Schema(description = "Детализация справочника service")
 public class ContactsOrgEkuDto implements Uuidable {
 
     private UUID uuid;

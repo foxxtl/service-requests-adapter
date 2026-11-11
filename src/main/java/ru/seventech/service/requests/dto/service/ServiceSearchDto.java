@@ -6,8 +6,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import ru.seventech.service.requests.dto.OrgDto;
-import ru.seventech.service.requests.dto.ProviderDto;
-import ru.seventech.service.requests.dto.ServiceReqAddValuesDto;
 import ru.seventech.service.requests.dto.service.fields.PortalEku;
 import ru.seventech.service.requests.dto.annotation.NotFetch;
 import ru.seventech.service.requests.dto.annotation.Uuidable;

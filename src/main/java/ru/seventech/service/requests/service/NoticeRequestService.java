@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 import ru.seventech.basetemplate.util.BaseSecurityHelper;
 import ru.seventech.service.requests.dto.NoticeRequestDto;
 import ru.seventech.service.requests.dto.service.ServiceDto;
-import ru.seventech.service.requests.dto.ServiceReqAddValuesDto;
+import ru.seventech.service.requests.dto.service.ServiceReqAddValuesDto;
 import ru.seventech.service.requests.dto.enums.CatalogNames;
 import ru.seventech.service.requests.service.mdm.MdmApiService;
 import ru.seventech.service.requests.service.mdm.SearchService;

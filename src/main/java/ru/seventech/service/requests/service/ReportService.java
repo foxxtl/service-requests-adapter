@@ -12,8 +12,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import ru.seventech.service.requests.dto.ItemSearchRequestDto;
-import ru.seventech.service.requests.dto.ProviderDto;
-import ru.seventech.service.requests.dto.ServiceReqAddValuesDto;
+import ru.seventech.service.requests.dto.service.ProviderDto;
+import ru.seventech.service.requests.dto.service.ServiceReqAddValuesDto;
 import ru.seventech.service.requests.dto.service.ServiceSearchDto;
 import ru.seventech.service.requests.service.request.ServiceResearchService;
 

@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 
 import ru.seventech.basetemplate.util.BaseSecurityHelper;
 import ru.seventech.service.requests.dto.mdm.ItemParamsRequestDTO;
-import ru.seventech.service.requests.dto.ProviderDto;
+import ru.seventech.service.requests.dto.service.ProviderDto;
 import ru.seventech.service.requests.service.BaseService;
 import ru.seventech.service.requests.service.mdm.SearchService;
 

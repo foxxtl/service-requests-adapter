@@ -1,4 +1,4 @@
-package ru.seventech.service.requests.dto;
+package ru.seventech.service.requests.dto.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import ru.seventech.service.requests.dto.OrgDto;
 import ru.seventech.service.requests.dto.mdm.CatalogItemDTO;
 import ru.seventech.service.requests.dto.annotation.NotFetch;
 

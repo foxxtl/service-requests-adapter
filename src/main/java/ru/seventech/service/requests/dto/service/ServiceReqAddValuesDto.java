@@ -1,4 +1,4 @@
-package ru.seventech.service.requests.dto;
+package ru.seventech.service.requests.dto.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
